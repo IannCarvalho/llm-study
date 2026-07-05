@@ -23,7 +23,7 @@ Setup:
 ```python
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_API_KEY"] = "your-api-key"
-os.environ["LANGCHAIN_PROJECT"] = "qubika-study"
+os.environ["LANGCHAIN_PROJECT"] = "llm-study"
 ```
 
 ### 2. langfuse_demo.py — LangFuse Analytics
@@ -353,7 +353,7 @@ Cost: 770 * $0.003/1k ≈ $0.0023
 # 3. Configurar .env
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_API_KEY=your-api-key-here
-LANGCHAIN_PROJECT=qubika-study
+LANGCHAIN_PROJECT=llm-study
 
 # 4. Usar LangChain/LangGraph normalmente
 # Tudo é automaticamente tracido!
@@ -385,19 +385,6 @@ http://localhost:3000
 ```
 
 ---
-
-## 🧪 Testando Localmente
-
-```bash
-cd /path/to/qubika
-.\venv\Scripts\activate.ps1
-
-# Testar LangSmith (requer API key)
-# python 03_observability/langsmith_example.py
-
-# Testar LangFuse (requer setup)
-python 03_observability/langfuse_example.py
-```
 
 ---
 

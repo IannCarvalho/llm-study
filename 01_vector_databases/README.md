@@ -213,17 +213,29 @@ Core Components:
 ## Running Examples
 
 Set up environment first:
-```bash
-# Activate venv and set PYTHONPATH
-cd c:\Users\carva\Desktop\qubika
+
+**Windows (PowerShell):**
+```powershell
 & .\venv\Scripts\Activate.ps1
-$env:PYTHONPATH = "c:\Users\carva\Desktop\qubika"
+$env:PYTHONPATH = "."
 
 # Run examples in order
-python 01_vector_databases/embeddings_basics.py
-python 01_vector_databases/chunking_strategies.py
-python 01_vector_databases/hybrid_search.py
-python 01_vector_databases/rag_pipeline.py
+python -m 01_vector_databases.embeddings_basics
+python -m 01_vector_databases.chunking_strategies
+python -m 01_vector_databases.hybrid_search
+python -m 01_vector_databases.rag_pipeline
+```
+
+**Linux/Mac (Bash):**
+```bash
+source venv/bin/activate
+export PYTHONPATH="."
+
+# Run examples in order
+python -m 01_vector_databases.embeddings_basics
+python -m 01_vector_databases.chunking_strategies
+python -m 01_vector_databases.hybrid_search
+python -m 01_vector_databases.rag_pipeline
 ```
 
 ## Key Concepts
@@ -271,7 +283,7 @@ python 01_vector_databases/rag_pipeline.py
 ### ImportError: cannot import name 'VectorEmbedder' from 'vector_utils'
 **Solution**: Ensure PYTHONPATH is set to workspace root:
 ```powershell
-$env:PYTHONPATH = "c:\Users\carva\Desktop\qubika"
+$env:PYTHONPATH = "."
 ```
 
 ### ValueError: Index not built
@@ -318,19 +330,6 @@ After mastering this module:
 ```
 
 ---
-
-## 🧪 Testando Localmente
-
-```bash
-cd /path/to/qubika
-
-# Ativar venv
-.\venv\Scripts\activate.ps1
-
-# Rodar cada exemplo
-python 02_vector_databases/embeddings_basics.py
-python 02_vector_databases/chunking_strategies.py
-python 02_vector_databases/rag_pipeline.py  # Requer Ollama!
 ```
 
 ---

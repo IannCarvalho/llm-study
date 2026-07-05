@@ -813,8 +813,6 @@ curl http://localhost:11434/api/tags
 
 **5. Configure Python:**
 ```powershell
-cd c:\Users\carva\Desktop\qubika
-
 # Crie venv
 python -m venv venv
 

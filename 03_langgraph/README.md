@@ -58,7 +58,7 @@ fetch_cve → (route_by_status) → summarize (sucesso) ou not_found (falha)
 ```bash
 # Ativar ambiente
 . venv/Scripts/Activate.ps1
-$env:PYTHONPATH = "c:\Users\carva\Desktop\qubika"
+$env:PYTHONPATH = "."
 
 # Linear pipeline
 python -m 03_langgraph.langgraph_basics
