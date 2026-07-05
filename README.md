@@ -59,8 +59,8 @@ pip install -r requirements.txt
 
 ### Step 2: Start Your LLM
 
-**Option A: Ollama (Recommended)**
-```powershell
+**Ollama (Recommended):**
+```bash
 # Terminal 1: Start Ollama (keep running)
 ollama serve
 
@@ -68,11 +68,13 @@ ollama serve
 ollama pull mistral
 ```
 
-**Option B: LLMStudio**
-- Launch LLMStudio, download a model, enable "Local Server"
+**LLMStudio:**
+- Download from https://lmstudio.ai
+- Launch, download a model, enable "Local Server"
 
-**Option C: OpenAI**
-- Set `OPENAI_API_KEY` in `.env` (see below)
+**OpenAI API:**
+- Get key from https://platform.openai.com
+- Set in `.env` as `OPENAI_API_KEY`
 
 ### Step 3: Configure `.env`
 
