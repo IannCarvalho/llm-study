@@ -27,7 +27,7 @@ def run_react_agent(user_query: str) -> None:
     messages = [{"role": "user", "content": user_query}]
 
     for step in range(1, MAX_STEPS + 1):
-        print(f"[Step {step}]")
+        print(f"[Iteration {step}]")
         response_text = llm.chat(messages=messages, system_prompt=REACT_SYSTEM, max_tokens=256)
         print(response_text)
         messages.append({"role": "assistant", "content": response_text})
@@ -47,7 +47,7 @@ def run_react_agent(user_query: str) -> None:
         print(f"Observation: {observation}\n")
         messages.append({"role": "user", "content": f"Observation: {observation}"})
 
-    print("Reached max steps without a final answer.")
+    print("Reached max iterations without a final answer.")
 
 
 if __name__ == "__main__":

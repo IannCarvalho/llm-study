@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
-    """Application configuration."""
+    """Loads configuration from environment variables and .env file."""
 
     ollama_model: str = Field(default="mistral", env="OLLAMA_MODEL")
     ollama_base_url: str = Field(default="http://localhost:11434/v1", env="OLLAMA_BASE_URL")

@@ -1,8 +1,10 @@
-# 🗄️ Módulo 4: RAG Databases
+# Module 04: RAG with Production Databases
 
-## Contexto: Dados Unificados
+This module demonstrates RAG implementations using two production-grade vector databases.
 
-Ambos os scripts usam o mesmo data source: `utils/data/cves.json` (CVE database unificado).
+## Overview
+
+Both scripts use the same data source: `utils/data/cves.json` (CVE database).
 
 ```python
 from utils.data_loader import load_cves, get_cve_documents
@@ -11,38 +13,35 @@ cves = load_cves()
 documents = get_cve_documents(cves)  # Formatted for RAG
 ```
 
-Isso permite comparar diferentes vector databases sem lidar com setup de dados.
+This allows you to compare different vector databases without managing separate data pipelines.
 
 ---
 
-## O que está aqui?
+## Databases
 
-Dois vector databases mais usados em produção para RAG:
-
-### 1. **chroma_rag.py** — MVP Local ⭐
+### 1. Chroma — Local Development
 ```
-Quando usar: Prototipar, desenvolver, testar localmente
+Use case: Prototyping and local development
 Setup: pip install chromadb
-Características:
-  ✅ Zero setup
-  ✅ Funciona offline
-  ✅ Perfeito para prototipagem
-  ❌ Não escala para produção
+Features:
+  - Zero configuration
+  - Works offline
+  - Ideal for rapid iteration
+  - Not suitable for production at scale
 ```
 
-### 2. **pinecone_rag.py** — Produção Cloud
+### 2. Pinecone — Cloud Production
 ```
-Quando usar: Aplicações em produção, escala
-Setup: 
-  1. Conta em https://www.pinecone.io
-  2. pip install pinecone-client
-  3. PINECONE_API_KEY no .env
-Características:
-  ✅ Managed (sem administração)
-  ✅ Escalável (bilhões de vetores)
-  ✅ Rápido (índices otimizados)
-  ❌ Requer API key
-  ❌ Custo mensal
+Use case: Production applications and scale
+Setup:
+  1. Create account at https://www.pinecone.io
+  2. Install: pip install pinecone-client
+  3. Add PINECONE_API_KEY to .env
+Features:
+  - Managed service (no administration)
+  - Scales to billions of vectors
+  - Optimized indexing
+  - Requires API key and billing
 ```
 
 ---

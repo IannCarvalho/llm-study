@@ -14,7 +14,6 @@ from enum import Enum
 # ============================================================================
 
 class SeverityLevel(str, Enum):
-    """Vulnerability severity levels."""
     CRITICAL = "CRITICAL"
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
@@ -23,7 +22,6 @@ class SeverityLevel(str, Enum):
 
 
 class VulnerabilityType(str, Enum):
-    """Common vulnerability types."""
     SQL_INJECTION = "sql_injection"
     XSS = "xss"
     CSRF = "csrf"
@@ -39,7 +37,6 @@ class VulnerabilityType(str, Enum):
 # ============================================================================
 
 class CVEMetadata(BaseModel):
-    """CVE metadata."""
     cve_id: str
     severity: SeverityLevel
     cvss_score: float = Field(ge=0.0, le=10.0)
@@ -53,7 +50,7 @@ class CVEMetadata(BaseModel):
 
 
 class CVEData(BaseModel):
-    """Complete CVE record with metadata and description."""
+    """Complete CVE vulnerability record."""
     id: str
     severity: SeverityLevel
     score: float = Field(ge=0.0, le=10.0)
@@ -78,7 +75,6 @@ class CVEData(BaseModel):
 # ============================================================================
 
 class VulnerabilityMetadata(BaseModel):
-    """Metadata for a vulnerability document."""
     severity: SeverityLevel
     type: VulnerabilityType
     cve_id: Optional[str] = None
@@ -89,7 +85,7 @@ class VulnerabilityMetadata(BaseModel):
 
 
 class Vulnerability(BaseModel):
-    """Vulnerability document for indexing."""
+    """Document format for indexed vulnerabilities."""
     id: str
     text: str
     metadata: VulnerabilityMetadata
@@ -99,7 +95,6 @@ class Vulnerability(BaseModel):
 
 
 class Document(BaseModel):
-    """Generic document for indexing."""
     id: str
     content: str
     metadata: Dict[str, Any] = {}
@@ -111,7 +106,7 @@ class Document(BaseModel):
 # ============================================================================
 
 class SearchResult(BaseModel):
-    """Single search result."""
+    """Result from search operations with retrieval metadata."""
     id: str
     content: str
     score: float = Field(ge=0.0, le=1.0)
@@ -121,7 +116,7 @@ class SearchResult(BaseModel):
 
 
 class SearchResults(BaseModel):
-    """Collection of search results."""
+    """Aggregated search results with timing and metadata."""
     query: str
     results: List[SearchResult]
     total_results: int
@@ -131,7 +126,7 @@ class SearchResults(BaseModel):
 
 
 class RankingResult(BaseModel):
-    """Result from a ranking operation."""
+    """Individual document in a ranked result set."""
     document_id: str
     content: str
     rank: int
@@ -144,7 +139,7 @@ class RankingResult(BaseModel):
 # ============================================================================
 
 class RAGContext(BaseModel):
-    """Context for RAG generation."""
+    """Query context for RAG generation, including retrieved documents."""
     query: str
     retrieved_documents: List[Document]
     context_text: str
@@ -152,7 +147,7 @@ class RAGContext(BaseModel):
 
 
 class RAGResponse(BaseModel):
-    """Response from RAG pipeline."""
+    """Complete RAG pipeline output."""
     query: str
     context: str
     response: str
@@ -162,7 +157,7 @@ class RAGResponse(BaseModel):
 
 
 class RAGConfig(BaseModel):
-    """Configuration for RAG pipeline."""
+    """Configuration for RAG pipeline execution."""
     retriever: str = "hybrid"  # "bm25", "semantic", "hybrid"
     top_k: int = 3
     model: str = "mistral"
@@ -175,20 +170,20 @@ class RAGConfig(BaseModel):
 # ============================================================================
 
 class ToolCall(BaseModel):
-    """Parsed tool call from LLM output."""
+    """Extracted tool call from LLM output."""
     tool_name: str
     tool_input: str
     raw_output: str
 
 
 class Message(BaseModel):
-    """Chat message."""
+    """Single message in a conversation."""
     role: str  # "user", "assistant", "system"
     content: str
 
 
 class ConversationTurn(BaseModel):
-    """Single turn in a conversation."""
+    """One interaction in an agent conversation."""
     user_message: str
     assistant_message: str
     tools_used: List[ToolCall] = []

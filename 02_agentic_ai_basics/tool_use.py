@@ -35,12 +35,12 @@ def run_tool_use_agent(user_query: str) -> None:
     llm = get_llm_client(temperature=0.2)
     messages = [{"role": "user", "content": user_query}]
 
-    # Step 1: Model decides which tool to use
-    print("[Step 1: Request Tool]")
+    # Initial request to model to decide which tool to use
+    print("[Request Tool]")
     response = llm.chat(messages=messages, system_prompt=TOOL_USE_SYSTEM, max_tokens=256)
     print(f"{response}\n")
     
-    # Step 2: Extract and execute tool
+    # Extract and execute tool
     tool_call = extract_tool_call(response)
     if not tool_call:
         print("Model did not request a tool.")
@@ -49,7 +49,7 @@ def run_tool_use_agent(user_query: str) -> None:
     tool_name = tool_call.get("name")
     tool_args = tool_call.get("arguments", {})
     
-    print("[Step 2: Execute Tool]")
+    print("[Execute Tool]")
     tool_fn = TOOL_REGISTRY.get(tool_name)
     if not tool_fn:
         print(f"Unknown tool: {tool_name}")
@@ -60,8 +60,8 @@ def run_tool_use_agent(user_query: str) -> None:
     print(f"Tool: {tool_name}({tool_args})")
     print(f"Result: {result}\n")
     
-    # Step 3: Model analyzes result
-    print("[Step 3: Analysis]")
+    # Model analyzes the result
+    print("[Analysis]")
     messages.append({"role": "assistant", "content": response})
     messages.append({
         "role": "user",
