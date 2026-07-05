@@ -84,7 +84,7 @@ Copy `.env.example` to `.env`:
 cp .env.example .env
 ```
 
-Edit `.env` with your LLM choice (already defaults to Ollama):
+Edit `.env` with your LLM choice (defaults to Ollama):
 
 ```
 OLLAMA_MODEL=mistral:latest
@@ -92,40 +92,75 @@ OLLAMA_BASE_URL=http://localhost:11434/v1
 OPENAI_API_KEY=ollama
 ```
 
-For other options, see [**LLM_SETUP.md**](LLM_SETUP.md).
+### Step 4: Run Examples
 
-### Step 4: Run an Example
+Run examples as Python packages:
 
+**Windows (PowerShell):**
 ```powershell
-cd c:\Users\carva\Desktop\qubika
-venv\Scripts\activate
+$env:PYTHONPATH = "."
 
-# Vector databases (good starting point)
-python 01_vector_databases/embeddings_basics.py
+# Vector database examples
+python -m 01_vector_databases.embeddings_basics
+python -m 01_vector_databases.chunking_strategies
+python -m 01_vector_databases.hybrid_search
 
-# Or verify everything works
-python verify_setup.py
+# Agent patterns
+python -m 02_agentic_ai_basics.tool_use
+python -m 02_agentic_ai_basics.react_pattern
+
+# LangGraph workflows
+python -m 03_langgraph.langgraph_basics
+python -m 03_langgraph.langgraph_conditional
+
+# Advanced workflows
+python -m 04_advanced_workflows.chroma_rag
+python -m 04_advanced_workflows.pinecone_rag
+
+# Observability
+python -m 05_observability.langsmith_demo
+python -m 05_observability.langfuse_demo
 ```
 
-This runs embeddings and basic vector operations.
+**Linux/Mac (Bash):**
+```bash
+export PYTHONPATH="."
 
-**For detailed LLM setup (credentials, Ollama, LLMStudio, OpenAI, etc.), see [LLM_SETUP.md](LLM_SETUP.md).**
+# Vector database examples
+python -m 01_vector_databases.embeddings_basics
+python -m 01_vector_databases.chunking_strategies
+python -m 01_vector_databases.hybrid_search
+
+# Agent patterns
+python -m 02_agentic_ai_basics.tool_use
+python -m 02_agentic_ai_basics.react_pattern
+
+# LangGraph workflows
+python -m 03_langgraph.langgraph_basics
+python -m 03_langgraph.langgraph_conditional
+
+# Advanced workflows
+python -m 04_advanced_workflows.chroma_rag
+python -m 04_advanced_workflows.pinecone_rag
+
+# Observability
+python -m 05_observability.langsmith_demo
+python -m 05_observability.langfuse_demo
+```
 
 ---
 
 ## LLM Configuration
 
-### I want to use...
+All examples support these LLM providers:
 
-| Choice | Setup Time | Cost | Notes | Go to |
-|--------|------------|------|-------|-------|
-| **Ollama** (Local) | 5 min | Free | Works offline, no API keys | [LLM_SETUP.md](LLM_SETUP.md#option-1-ollama) |
-| **LLMStudio** (GUI) | 5 min | Free | GUI alternative to Ollama | [LLM_SETUP.md](LLM_SETUP.md#option-2-llmstudio) |
-| **OpenAI** (Cloud) | 2 min | $0.001-0.05/1K tokens | Production-grade quality | [LLM_SETUP.md](LLM_SETUP.md#option-3-openai) |
-| **Claude** (Cloud) | 2 min | $0.003-0.03/1K tokens | Alternative cloud provider | [LLM_SETUP.md](LLM_SETUP.md#option-4-claude) |
-| **Gemini** (Cloud) | 2 min | Free-$0.0025/1K tokens | Alternative cloud provider | [LLM_SETUP.md](LLM_SETUP.md#option-5-gemini) |
+| Provider | Setup | Notes |
+|----------|-------|-------|
+| **Ollama** (Local) | `ollama serve` → `ollama pull mistral` | Free, offline, no API keys |
+| **LLMStudio** (Local) | GUI download, enable local server | Free alternative to Ollama |
+| **OpenAI** (Cloud) | Set `OPENAI_API_KEY` in `.env` | Production-grade, costs per token |
 
-For detailed configuration options, see [LLM_SETUP.md](LLM_SETUP.md).
+Configure in `.env` file. See `.env.example` for all options.
 
 ---
 
@@ -193,7 +228,7 @@ README.md                       # This file
 
 ---
 
-## 📊 Unified Data Source: CVE Database
+## Unified Data Source: CVE Database
 
 All examples use a single, centralized CVE database (`utils/data/cves.json`) for consistency:
 
@@ -208,22 +243,22 @@ documents = get_cve_documents(cves)
 ```
 
 **Benefits:**
-- ✅ Single source of truth
-- ✅ Consistent data across all examples
-- ✅ Easy to swap for production data
-- ✅ Simplified setup and maintenance
+- Single source of truth across all examples
+- Consistent data for comparison across different techniques
+- Easy to swap for production data
+- Simplified setup and maintenance
 
 ---
 
-## 🛠️ Utils Folder — Centralized Utilities
+## Utils Folder — Centralized Utilities
 
-All shared utilities are organized in a single `utils/` folder for maximum code reuse:
+All shared utilities are organized in a single `utils/` folder for maximum code reuse.
 
-**Why centralize?**
-- ✅ Single source of truth for each utility
-- ✅ Easy to find and reuse functions
-- ✅ Consistent imports across all modules
-- ✅ Easy to maintain and update
+Centralized utilities provide:
+- Single source of truth for each utility
+- Easy to find and reuse functions
+- Consistent imports across all modules
+- Simplified maintenance and updates
 
 **Key components:**
 
@@ -238,7 +273,7 @@ All shared utilities are organized in a single `utils/` folder for maximum code 
 
 ---
 
-## 🔧 LLM Configuration & Credentials
+## LLM Client API
 
 All LLM calls use a centralized client (`utils.llm_client`) for consistency and easy switching between providers:
 
@@ -459,7 +494,7 @@ LLM_MAX_TOKENS=512           # Max response length
 # LangSmith (LangChain Official Tracing)
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_API_KEY=lsv2_pt_xxxxxxxxxxxx
-LANGCHAIN_PROJECT=qubika-study
+LANGCHAIN_PROJECT=llm-study
 
 # LangFuse (Analytics & Evaluation)
 LANGFUSE_PUBLIC_KEY=pk-lf-xxxxxxxxxxxx
@@ -600,7 +635,7 @@ Solution 4: Ensure key starts with "sk-"
 ```
 Solution 1: Check PINECONE_API_KEY in .env
 Solution 2: Verify key at https://www.pinecone.io
-Solution 3: Create an index named "qubika-rag"
+Solution 3: Create an index named "llm-study"
 ```
 
 **Issue**: Forgot or lost API key
@@ -622,8 +657,10 @@ Solution:
 
 **Issue**: "No module named 'utils'"
 ```
-Solution 1: Make sure you're in project root: c:\Users\carva\Desktop\qubika
-Solution 2: Set PYTHONPATH: $env:PYTHONPATH = "c:\Users\carva\Desktop\qubika"
+Solution 1: Make sure you're in project root: /path/to/llm-study
+Solution 2: Set PYTHONPATH:
+  - Windows: $env:PYTHONPATH = "."
+  - Linux/Mac: export PYTHONPATH="."
 Solution 3: Use relative imports correctly
 ```
 
