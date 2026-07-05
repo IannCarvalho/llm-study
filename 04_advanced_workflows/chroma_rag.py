@@ -45,16 +45,13 @@ def main():
     else:
         logger.info(f"Collection already has {rag.count_documents()} documents")
     
-    # Define query
-    query = "What is CVE-2024-1234?"
-    
     print(f"\n{'='*70}")
     print(f"Query: '{QUERY}'")
     print(f"{'='*70}\n")
     
     # Generate RAG response
     response = rag.generate_rag_response(
-        query=query,
+        query=QUERY,
         system_prompt=RAG_SYSTEM
     )
     
