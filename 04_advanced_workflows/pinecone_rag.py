@@ -30,7 +30,7 @@ def main():
         return
     
     pc = Pinecone(api_key=api_key)
-    index = pc.Index("qubika-rag")
+    index = pc.Index("llm-study")
     
     print("Connected to Pinecone\n")
     

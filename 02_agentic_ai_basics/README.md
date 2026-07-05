@@ -53,13 +53,13 @@ Thought → Action[tool] → Observe → (Repeat?) → Final Answer
 ```bash
 # Ativar ambiente
 . venv/Scripts/Activate.ps1
-$env:PYTHONPATH = "c:\Users\carva\Desktop\qubika"
+$env:PYTHONPATH = "."
 
 # Tool Use: decisão direta
-python -m 01_agentic_ai_basics.tool_use
+python -m 02_agentic_ai_basics.tool_use
 
 # ReAct: loop com raciocínio explícito
-python -m 01_agentic_ai_basics.react_pattern
+python -m 02_agentic_ai_basics.react_pattern
 ```
 
 ---

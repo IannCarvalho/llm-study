@@ -56,7 +56,7 @@ python 04_advanced_workflows/chroma_rag.py
 ### Pinecone (requer configuração)
 ```bash
 # 1. Set PINECONE_API_KEY no .env
-# 2. Criar índice chamado "qubika-rag" no Pinecone
+# 2. Create an index named "llm-study" in Pinecone
 python 04_advanced_workflows/pinecone_rag.py
 ```
 
