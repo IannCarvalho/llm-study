@@ -1,18 +1,16 @@
 # AI Engineering Study Repository: LangGraph, Vector Databases & Observability
 
-A **completely free** educational repository for learning production AI engineering patterns.
-
-- ✅ **Local LLM**: Ollama + Mistral (no API keys required)
-- ✅ **Vector Database**: Chroma (local) + Pinecone (cloud-ready)
-- ✅ **5 Learning Modules**: Vector Databases, Agentic AI, LangGraph, Advanced Workflows, Observability
-- ✅ **Unified Data Source**: CVE vulnerability data across all examples
-- ✅ **Modern Fusion**: Reciprocal Rank Fusion (RRF) for hybrid search
-- ✅ **Centralized Utilities**: Reusable components in `utils/` folder
-- ✅ **Practical Examples**: Production-ready Python with LangChain
+Educational repository with practical examples for learning LLM engineering patterns:
+- Ollama + Mistral for local LLM (no API keys required)
+- Chroma (local) + Pinecone (cloud) for vector databases
+- 5 learning modules: Vector Databases, Agentic AI, LangGraph, Advanced Workflows, Observability
+- Single unified data source (CVE database) across all examples
+- Reciprocal Rank Fusion for hybrid keyword + semantic search
+- Reusable utilities in `utils/` folder
 
 ---
 
-## 📦 What's Inside
+## Contents
 
 | Module | Topics | Files |
 |--------|--------|-------|
@@ -20,11 +18,11 @@ A **completely free** educational repository for learning production AI engineer
 | **02_agentic_ai_basics** | ReAct, Tool Use, Conversation Management | react_pattern.py, tool_use.py |
 | **04_advanced_workflows** | RAG + Agents, Production DBs | chroma_rag.py, pinecone_rag.py, setup_pinecone.py |
 | **05_observability** | LangSmith, LangFuse, Tracing & Debugging | langsmith_example.py, langfuse.py |
-| **utils/** | 🎯 Shared utilities | 5 reusable modules |
+| **utils/** | Shared utilities | 5 reusable modules |
 
 ---
 
-## ⚡ Quick Start (5 minutes)
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -33,16 +31,27 @@ A **completely free** educational repository for learning production AI engineer
   - **LLMStudio** (local, free, GUI) — Download from https://lmstudio.ai
   - **OpenAI API key** (cloud, paid) — Get from https://platform.openai.com
 
-### Step 1: Configure Python
+### Step 1: Set Up Environment
 
+**Windows (PowerShell):**
 ```powershell
-cd c:\Users\carva\Desktop\qubika
-
 # Create virtual environment (if needed)
 python -m venv venv
 
 # Activate
 venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+**Linux/Mac (Bash):**
+```bash
+# Create virtual environment (if needed)
+python3 -m venv venv
+
+# Activate
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -96,29 +105,25 @@ python 01_vector_databases/embeddings_basics.py
 python verify_setup.py
 ```
 
-That's it! See embeddings and vector operations in action.
+This runs embeddings and basic vector operations.
 
 **For detailed LLM setup (credentials, Ollama, LLMStudio, OpenAI, etc.), see [LLM_SETUP.md](LLM_SETUP.md).**
 
 ---
 
-## 🔐 LLM & Credentials — Quick Reference
+## LLM Configuration
 
 ### I want to use...
 
 | Choice | Setup Time | Cost | Notes | Go to |
 |--------|------------|------|-------|-------|
-| **Ollama** (Local) | 5 min | Free | Recommended for learning, works offline | [LLM_SETUP.md](LLM_SETUP.md#option-1-ollama-recommended-for-learning) |
-| **LLMStudio** (GUI) | 5 min | Free | Same as Ollama but with GUI | [LLM_SETUP.md](LLM_SETUP.md#option-2-llmstudio-gui-alternative) |
-| **OpenAI** (Cloud) | 2 min | $0.001-0.05/1K tokens | Production-ready, best quality | [LLM_SETUP.md](LLM_SETUP.md#option-3-openai-production) |
-| **Claude** (Cloud) | 2 min | $0.003-0.03/1K tokens | High quality, good reasoning | [LLM_SETUP.md](LLM_SETUP.md#option-4-anthropic-claude) |
-| **Gemini** (Cloud) | 2 min | Free-$0.0025/1K tokens | Budget-friendly | [LLM_SETUP.md](LLM_SETUP.md#option-5-google-gemini) |
+| **Ollama** (Local) | 5 min | Free | Works offline, no API keys | [LLM_SETUP.md](LLM_SETUP.md#option-1-ollama) |
+| **LLMStudio** (GUI) | 5 min | Free | GUI alternative to Ollama | [LLM_SETUP.md](LLM_SETUP.md#option-2-llmstudio) |
+| **OpenAI** (Cloud) | 2 min | $0.001-0.05/1K tokens | Production-grade quality | [LLM_SETUP.md](LLM_SETUP.md#option-3-openai) |
+| **Claude** (Cloud) | 2 min | $0.003-0.03/1K tokens | Alternative cloud provider | [LLM_SETUP.md](LLM_SETUP.md#option-4-claude) |
+| **Gemini** (Cloud) | 2 min | Free-$0.0025/1K tokens | Alternative cloud provider | [LLM_SETUP.md](LLM_SETUP.md#option-5-gemini) |
 
-**TL;DR:**
-- Learning/Development → **Ollama** (free, local, no API keys)
-- Production → **OpenAI** (reliable, well-integrated)
-- Want GUI? → **LLMStudio**
-- Need more info? → **[LLM_SETUP.md](LLM_SETUP.md)**
+For detailed configuration options, see [LLM_SETUP.md](LLM_SETUP.md).
 
 ---
 
@@ -155,7 +160,7 @@ That's it! See embeddings and vector operations in action.
 data/
 ├── chroma/                    # Local Chroma database
 
-utils/                          # 🎯 Shared utilities (centralized)
+utils/                          # Shared utilities (centralized)
 ├── __init__.py
 ├── llm_client.py              # LLM integration (Ollama/OpenAI)
 ├── agentic_utils.py           # Agent utilities
@@ -647,16 +652,6 @@ Solution: Check if utils/data/cves.json exists
 ### More Help
 
 For detailed troubleshooting of LLM setups, see **[LLM_SETUP.md](LLM_SETUP.md#-troubleshooting)**.
-
----
-
-## Next Steps
-
-1. Run `verify_setup.py` to confirm everything works
-2. Study Module 1: Start with `01_vector_databases/embeddings_basics.py`
-3. Read the `notes.md` in each module for detailed concepts
-4. Experiment: Modify prompts, add new tools, build custom workflows
-5. Deploy: Use these patterns in production with cloud LLMs
 
 ---
 

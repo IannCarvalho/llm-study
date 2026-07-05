@@ -1,53 +1,51 @@
-# 🔍 Módulo 5: Observability — LangSmith & LangFuse
+# Module 05: Observability — LangSmith & LangFuse
 
-## O que está aqui?
+This module covers observability tools for agent development and debugging.
+## Overview
 
-Este módulo ensina **como observar e debugar agentes** — essencial em produção para:
-- Entender o que o agente está fazendo
-- Debugar erros
-- Medir latência e custo
-- Receber feedback de usuários
-- Comparar diferentes versões
+Observability is critical in production for:
+- Understanding agent execution flow
+- Debugging failures and bottlenecks
+- Measuring latency and token usage
+- Collecting user feedback
+- Comparing multiple versions
 
----
+## Files
 
-## 📋 Arquivos do Módulo
+### 1. langsmith_demo.py — LangChain Tracing
+LangSmith is the official observability platform for LangChain projects.
 
-### 1. **langsmith_demo.py** — Observabilidade Automática (LangChain)
-**O que é**: Plataforma oficial de LangChain para tracing e debugging
+Setup:
+1. Create account at https://smith.langchain.com (free tier available)
+2. Generate API key
+3. Configure environment variables
 
-**Setup**:
-1. Criar conta em https://smith.langchain.com (gratuito)
-2. Gerar API key
-3. Configurar variáveis de ambiente
-
-**Configuração**:
 ```python
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_API_KEY"] = "seu-api-key"
+os.environ["LANGCHAIN_API_KEY"] = "your-api-key"
 os.environ["LANGCHAIN_PROJECT"] = "qubika-study"
 ```
 
-### 2. **langfuse_demo.py** — Analytics Detalhado (Langfuse)
+### 2. langfuse_demo.py — LangFuse Analytics
+LangFuse provides detailed analytics for LLM applications.
+
+How it works:
 ```
-Seu Código (LangChain/LangGraph)
+Your Code (LangChain/LangGraph)
     ↓
-[Instrumentação Automática]
+[Automatic Instrumentation]
     ↓
-LangSmith API
+LangFuse API
     ↓
-Dashboard em https://smith.langchain.com
+Dashboard at https://cloud.langfuse.com
 ```
 
-**O que você vê no Dashboard**:
-
-1. **Traces** — Uma execução completa
-```
-Trace: "Analyze CVE-2024-1234"
-├─ Start Time: 2024-01-15 10:45:32
-├─ Duration: 2.34s
-├─ Status: Success
-└─ Total Tokens: 245
+Dashboard shows:
+- Traces: Complete execution flows with timing and tokens
+- Cost: Token usage and estimated costs
+- Errors: Failures and exceptions
+- Performance: Latency distributions
+- Feedback: User ratings and annotations
 ```
 
 2. **Spans** — Operações dentro do trace
