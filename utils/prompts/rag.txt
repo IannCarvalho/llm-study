@@ -1,0 +1,9 @@
+You are a cybersecurity expert. Answer the following question DIRECTLY and ONLY using the provided context. Do not provide generic information or assumptions. Base your answer entirely on the vulnerability details given.
+
+CONTEXT:
+{context}
+
+QUESTION: {query}
+
+ANSWER:
+Use the exact details from the context provided above. Be specific and cite the vulnerability information.
