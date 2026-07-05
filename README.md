@@ -26,26 +26,12 @@ A **completely free** educational repository for learning production AI engineer
 
 ## ⚡ Quick Start (5 minutes)
 
-```powershell
-# 1. Terminal 1: Start Ollama (keep running)
-ollama serve
-
-# 2. Terminal 2: Run example (starts with vector databases - the foundation)
-cd c:\Users\carva\Desktop\qubika
-venv\Scripts\activate
-python 01_vector_databases/embeddings_basics.py
-```
-
-That's it! See embeddings and vector operations in action.
-
----
-
-## Getting Started
-
 ### Prerequisites
 - Python 3.8+
-- [Ollama](https://ollama.ai) installed
-- ~10GB free disk space
+- One of the following:
+  - **Ollama** (local, free) — Download from https://ollama.ai
+  - **LLMStudio** (local, free, GUI) — Download from https://lmstudio.ai
+  - **OpenAI API key** (cloud, paid) — Get from https://platform.openai.com
 
 ### Step 1: Configure Python
 
@@ -62,40 +48,77 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Start Ollama
+### Step 2: Start Your LLM
 
-Open **a separate PowerShell** and run:
-
+**Option A: Ollama (Recommended)**
 ```powershell
-# Download model (first time only)
-ollama pull mistral
-
-# Start server (keep it running)
+# Terminal 1: Start Ollama (keep running)
 ollama serve
+
+# Terminal 2: Download a model (first time only)
+ollama pull mistral
 ```
 
-You'll see:
+**Option B: LLMStudio**
+- Launch LLMStudio, download a model, enable "Local Server"
+
+**Option C: OpenAI**
+- Set `OPENAI_API_KEY` in `.env` (see below)
+
+### Step 3: Configure `.env`
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
 ```
-Starting Ollama server...
-Listening on 127.0.0.1:11434
+
+Edit `.env` with your LLM choice (already defaults to Ollama):
+
+```
+OLLAMA_MODEL=mistral:latest
+OLLAMA_BASE_URL=http://localhost:11434/v1
+OPENAI_API_KEY=ollama
 ```
 
-✓ Ollama is ready!
+For other options, see [**LLM_SETUP.md**](LLM_SETUP.md).
 
-### Step 3: Learn
-
-In **another PowerShell**:
+### Step 4: Run an Example
 
 ```powershell
 cd c:\Users\carva\Desktop\qubika
 venv\Scripts\activate
 
-# Quick test
-python verify_setup.py
-
-# Run first example (vector databases - the foundation)
+# Vector databases (good starting point)
 python 01_vector_databases/embeddings_basics.py
+
+# Or verify everything works
+python verify_setup.py
 ```
+
+That's it! See embeddings and vector operations in action.
+
+**For detailed LLM setup (credentials, Ollama, LLMStudio, OpenAI, etc.), see [LLM_SETUP.md](LLM_SETUP.md).**
+
+---
+
+## 🔐 LLM & Credentials — Quick Reference
+
+### I want to use...
+
+| Choice | Setup Time | Cost | Notes | Go to |
+|--------|------------|------|-------|-------|
+| **Ollama** (Local) | 5 min | Free | Recommended for learning, works offline | [LLM_SETUP.md](LLM_SETUP.md#option-1-ollama-recommended-for-learning) |
+| **LLMStudio** (GUI) | 5 min | Free | Same as Ollama but with GUI | [LLM_SETUP.md](LLM_SETUP.md#option-2-llmstudio-gui-alternative) |
+| **OpenAI** (Cloud) | 2 min | $0.001-0.05/1K tokens | Production-ready, best quality | [LLM_SETUP.md](LLM_SETUP.md#option-3-openai-production) |
+| **Claude** (Cloud) | 2 min | $0.003-0.03/1K tokens | High quality, good reasoning | [LLM_SETUP.md](LLM_SETUP.md#option-4-anthropic-claude) |
+| **Gemini** (Cloud) | 2 min | Free-$0.0025/1K tokens | Budget-friendly | [LLM_SETUP.md](LLM_SETUP.md#option-5-google-gemini) |
+
+**TL;DR:**
+- Learning/Development → **Ollama** (free, local, no API keys)
+- Production → **OpenAI** (reliable, well-integrated)
+- Want GUI? → **LLMStudio**
+- Need more info? → **[LLM_SETUP.md](LLM_SETUP.md)**
 
 ---
 
@@ -208,7 +231,7 @@ All shared utilities are organized in a single `utils/` folder for maximum code 
 
 ---
 
-## LLM Configuration
+## 🔧 LLM Configuration & Credentials
 
 All LLM calls use a centralized client (`utils.llm_client`) for consistency and easy switching between providers:
 
@@ -238,26 +261,240 @@ chain = ChatPromptTemplate.from_template("...") | llm
 
 **Benefits:**
 - Single point of configuration (change `OLLAMA_URL` in `.env` → affects entire project)
-- Seamless switching: Ollama ↔ OpenAI (just change environment variables)
+- Seamless switching: Local ↔ Cloud LLMs (just change environment variables)
 - Centralized settings: temperature, max_tokens, model name
-- Lazy loading: Only imports LangChain when actually used
+- Lazy loading: Only imports when actually used
+
+---
+
+### Option 1: Local LLM — Ollama (Recommended for Learning)
+
+**Why Ollama?**
+- ✅ **Free**: No API keys or subscriptions required
+- ✅ **Privacy**: All data stays on your machine
+- ✅ **Fast**: Low latency for quick iterations
+- ✅ **Offline**: Works without internet
+- ✅ **Multiple Models**: Run Mistral, Llama, Neural Chat, etc.
+
+**Setup:**
+
+1. **Install Ollama** from https://ollama.ai
+
+2. **Start Ollama** (in a separate terminal, keep running):
+```powershell
+ollama serve
+```
+
+3. **Download a model** (first time only):
+```powershell
+ollama pull mistral       # Fast, 7B parameters
+ollama pull llama2        # Larger, 7B/13B/70B options
+ollama pull neural-chat   # Smaller, chat-optimized
+```
+
+4. **Configure in `.env`**:
+```
+OLLAMA_MODEL=mistral:latest
+OLLAMA_BASE_URL=http://localhost:11434/v1
+OPENAI_API_KEY=ollama
+```
+
+5. **Verify**:
+```bash
+curl http://localhost:11434/api/generate -d '{"model":"mistral","prompt":"hello"}'
+```
+
+**Popular Ollama Models:**
+- `mistral:latest` — Best balance of speed/quality
+- `llama2` — Meta's LLaMA 2 (7B/13B)
+- `neural-chat` — Small but good at chat
+- `dolphin-mixtral` — High quality, multi-task
+
+---
+
+### Option 2: LLMStudio (GUI Alternative to Ollama)
+
+**What is LLMStudio?**
+- Visual interface for running local LLMs
+- No terminal required
+- Better for non-technical users
+
+**Setup:**
+
+1. **Download** from https://lmstudio.ai
+
+2. **Launch and download a model** (GUI-based)
+
+3. **Start local server** (in LLMStudio settings):
+   - Enable "Local Server" 
+   - Keep it running
+
+4. **Configure in `.env`** (same as Ollama):
+```
+OLLAMA_BASE_URL=http://localhost:8000/v1
+OPENAI_API_KEY=not-needed
+OLLAMA_MODEL=whatever-model-you-loaded
+```
+
+---
+
+### Option 3: Cloud LLM — OpenAI (Production)
+
+**When to use:**
+- Production applications
+- Need GPT-4 capability
+- High throughput requirements
+
+**Setup:**
+
+1. **Get API key** from https://platform.openai.com/account/api-keys
+
+2. **Configure in `.env`**:
+```
+OPENAI_API_KEY=sk-xxxxxxxxxxxx
+OPENAI_MODEL=gpt-4o-mini  # or gpt-3.5-turbo for cheaper
+OLLAMA_BASE_URL=https://api.openai.com/v1
+```
+
+**Cost:** ~$0.001-0.01 per 1000 tokens (check pricing)
+
+---
+
+### Option 4: Other Providers (Anthropic, Google, etc.)
+
+The system uses LangChain, which supports many providers:
+
+```python
+# For other providers, modify utils/llm_client.py:
+# from langchain_anthropic import ChatAnthropic  # Claude
+# from langchain_google_genai import ChatGoogleGenerativeAI  # Gemini
+# from langchain_cohere import ChatCohere  # Cohere
+```
+
+Each provider needs its own configuration — see [LangChain Providers](https://python.langchain.com/docs/integrations/llms/).
+
+---
+
+### 🔐 Credentials Security Best Practices
+
+**DO:**
+```
+✅ Store in .env file (already .gitignored)
+✅ Use environment variables in production
+✅ Rotate API keys regularly
+✅ Use least-privilege API keys (read-only when possible)
+✅ Monitor API usage for unexpected charges
+```
+
+**DON'T:**
+```
+❌ Commit API keys to git
+❌ Share .env file
+❌ Use same key for multiple projects
+❌ Hardcode credentials in code
+❌ Log API keys in debug output
+```
+
+**For Production:**
+- Use secrets manager (AWS Secrets Manager, Azure Key Vault, HashiCorp Vault)
+- Set environment variables on server/container
+- Rotate keys every 90 days
+- Use different keys for dev/staging/production
+
+---
+
+### Switching Between LLMs
+
+The entire project switches LLM providers by changing a few `.env` variables:
+
+**From Ollama → OpenAI:**
+```bash
+# Change .env:
+OPENAI_API_KEY=sk-xxxxxxxxxxxx
+OLLAMA_BASE_URL=https://api.openai.com/v1
+OLLAMA_MODEL=gpt-4o-mini
+```
+
+**From Ollama → Anthropic Claude:**
+```bash
+# Modify utils/llm_client.py to use ChatAnthropic
+# Then set .env:
+ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxx
+```
+
+No code changes needed! Just environment variables.
 
 ---
 
 ## Environment Variables (.env)
 
+Copy `.env.example` to `.env` and fill in your values:
+
 ```
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=mistral
+# ===== LLM Configuration =====
+
+# Option A: Ollama (Local, Free, Recommended)
+OLLAMA_MODEL=mistral:latest
+OLLAMA_BASE_URL=http://localhost:11434/v1
 OPENAI_API_KEY=ollama
 
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_API_KEY=your_langsmith_key
-LANGCHAIN_PROJECT=qubika
+# Option B: OpenAI (Cloud, Production)
+# OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxx
+# OLLAMA_BASE_URL=https://api.openai.com/v1
+# OLLAMA_MODEL=gpt-4o-mini
 
-LANGFUSE_PUBLIC_KEY=your_key
-LANGFUSE_SECRET_KEY=your_secret
+# LLM Behavior
+LLM_TEMPERATURE=0.7          # 0.0 (deterministic) - 2.0 (creative)
+LLM_MAX_TOKENS=512           # Max response length
+
+# ===== Observability (Optional) =====
+
+# LangSmith (LangChain Official Tracing)
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=lsv2_pt_xxxxxxxxxxxx
+LANGCHAIN_PROJECT=qubika-study
+
+# LangFuse (Analytics & Evaluation)
+LANGFUSE_PUBLIC_KEY=pk-lf-xxxxxxxxxxxx
+LANGFUSE_SECRET_KEY=sk-lf-xxxxxxxxxxxx
+LANGFUSE_BASE_URL=https://us.cloud.langfuse.com
+
+# ===== Vector Databases (Optional) =====
+
+# Chroma (default, local, no setup needed)
+CHROMA_PATH=./data/chroma
+
+# Pinecone (cloud, requires API key)
+PINECONE_API_KEY=pcsk_xxxxxxxxxxxxxxxxxxxx
+
+# ===== Other (Optional) =====
+
+# HuggingFace (for embeddings models)
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Debugging
+DEBUG=false
+LOG_LEVEL=INFO
 ```
+
+---
+
+## Configuration Reference
+
+All settings are managed in `utils/config.py` using Pydantic:
+
+| Variable | Default | Type | Purpose |
+|----------|---------|------|---------|
+| `OLLAMA_MODEL` | `mistral` | str | Which LLM to use |
+| `OLLAMA_BASE_URL` | `http://localhost:11434/v1` | str | LLM API endpoint |
+| `OPENAI_API_KEY` | `ollama` | str | API key or "ollama" |
+| `LLM_TEMPERATURE` | `0.7` | float | Creativity (0.0-2.0) |
+| `LLM_MAX_TOKENS` | `512` | int | Max response length |
+| `CHROMA_PATH` | `./data/chroma` | str | Local vector DB path |
+| `PINECONE_API_KEY` | None | str | Pinecone API key (optional) |
+| `HF_TOKEN` | None | str | HuggingFace token (optional) |
+| `DEBUG` | `false` | bool | Enable debug logging |
+| `LOG_LEVEL` | `INFO` | str | Logging level |
 
 ---
 
@@ -314,22 +551,102 @@ LANGFUSE_SECRET_KEY=your_secret
 
 ---
 
-## Common Issues
+## 🐛 Common Issues & Troubleshooting
 
-**Issue**: Ollama connection refused
+### LLM Connection Issues
+
+**Issue**: "Connection refused" to Ollama
 ```
-Solution: Run 'ollama serve' in a separate terminal first
+Solution 1: Start Ollama in a separate terminal: ollama serve
+Solution 2: Check port is open: curl http://localhost:11434/api/tags
+Solution 3: Restart Ollama (it may have crashed)
+Solution 4: Check OLLAMA_BASE_URL in .env is correct (http://localhost:11434/v1)
 ```
 
-**Issue**: Module not found errors
+**Issue**: "Model not found" or empty responses
 ```
-Solution: pip install -r requirements.txt in activated venv
+Solution 1: Check model is installed: ollama list
+Solution 2: Download model: ollama pull mistral
+Solution 3: Check .env OLLAMA_MODEL matches installed model
+Solution 4: Try a different model: ollama pull neural-chat
 ```
 
-**Issue**: "Empty response from LLM"
+**Issue**: LLM is very slow or uses too much memory
 ```
-Solution: Check Ollama is running, model loaded (ollama pull mistral)
+Solution 1: Use a smaller model: ollama pull neural-chat (instead of mistral)
+Solution 2: Reduce LLM_MAX_TOKENS in .env (less output = faster)
+Solution 3: Increase your system RAM or add swap space
+Solution 4: Use cloud LLM (OpenAI, Claude) instead of local
 ```
+
+### Credential Issues
+
+**Issue**: "401 Unauthorized" with OpenAI
+```
+Solution 1: Verify OPENAI_API_KEY is set: echo $OPENAI_API_KEY
+Solution 2: Check API key is valid: https://platform.openai.com/account/api-keys
+Solution 3: Key may have been revoked — generate a new one
+Solution 4: Ensure key starts with "sk-"
+```
+
+**Issue**: "Invalid API key" with Pinecone
+```
+Solution 1: Check PINECONE_API_KEY in .env
+Solution 2: Verify key at https://www.pinecone.io
+Solution 3: Create an index named "qubika-rag"
+```
+
+**Issue**: Forgot or lost API key
+```
+Solution 1: Generate a new one from provider dashboard
+Solution 2: Update .env file
+Solution 3: Old key may still work temporarily (cache)
+```
+
+### Python & Environment Issues
+
+**Issue**: "Module not found" errors
+```
+Solution: 
+1. Activate venv: venv\Scripts\activate (Windows) or source venv/bin/activate (Mac/Linux)
+2. Install deps: pip install -r requirements.txt
+3. Verify: python -c "import langchain; print('OK')"
+```
+
+**Issue**: "No module named 'utils'"
+```
+Solution 1: Make sure you're in project root: c:\Users\carva\Desktop\qubika
+Solution 2: Set PYTHONPATH: $env:PYTHONPATH = "c:\Users\carva\Desktop\qubika"
+Solution 3: Use relative imports correctly
+```
+
+**Issue**: Different Python version causing issues
+```
+Solution: Use Python 3.8 - 3.11
+1. Check: python --version
+2. Create fresh venv: python -m venv venv
+3. Reinstall: pip install -r requirements.txt
+```
+
+### Data Issues
+
+**Issue**: Vector DB is empty or has old data
+```
+Solution: Remove and recreate
+- Delete: rm -r data/chroma (or rmdir /s data\chroma on Windows)
+- Rerun: python 04_advanced_workflows/chroma_rag.py
+```
+
+**Issue**: "CVE data not loading"
+```
+Solution: Check if utils/data/cves.json exists
+- Verify: ls utils/data/cves.json
+- If missing: data should be in git
+```
+
+### More Help
+
+For detailed troubleshooting of LLM setups, see **[LLM_SETUP.md](LLM_SETUP.md#-troubleshooting)**.
 
 ---
 
@@ -561,25 +878,3 @@ print('✅ Funciona!'); print(response.choices[0].message.content)
 - ✅ Rate limiting
 
 ---
-
-## 📖 Referências
-
-- [Ollama](https://github.com/ollama/ollama)
-- [LangChain](https://python.langchain.com)
-- [LangGraph](https://github.com/langchain-ai/langgraph)
-- [Chroma](https://docs.trychroma.com)
-- [OpenAI API](https://platform.openai.com/docs)
-
----
-
-## 💡 Dicas
-
-1. **Deixe Ollama rodando** enquanto estuda — use dois terminais
-2. **Comece com Mistral** — mais rápido que Llama2
-3. **Leia os `notes.md`** — explicam conceitos importantes
-4. **Modifique os exemplos** — entender é mexer no código
-5. **Grave suas explicações** — simule a entrevista
-
----
-
-**Objetivo:** Entender os conceitos e conseguir falar sobre eles naturalmente. 🚀
