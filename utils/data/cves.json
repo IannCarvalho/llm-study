@@ -1,0 +1,29 @@
+[
+  {
+    "id": "CVE-2024-1234",
+    "severity": "CRITICAL",
+    "score": 9.8,
+    "description": "Remote code execution vulnerability in WebServer v2.1. An unauthenticated attacker can execute arbitrary commands on the server through a buffer overflow in the request handler. The vulnerability exists in the HTTP request parsing module which fails to properly validate input length before writing to a fixed-size buffer. This allows an attacker to overwrite the instruction pointer and redirect execution to malicious code. The vulnerability is exploitable over the network without authentication and affects all versions prior to 2.2. The attack vector is network-based with low complexity, allowing remote attackers to gain complete system compromise. Exploitation requires crafted HTTP requests with oversized headers that trigger the buffer overflow condition. Multiple proof-of-concept exploits are available in the wild.",
+    "affected_versions": ["2.0", "2.1"],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "rce"
+  },
+  {
+    "id": "CVE-2024-5678",
+    "severity": "HIGH",
+    "score": 8.2,
+    "description": "SQL injection vulnerability in AuthService v1.5 authentication module. The vulnerability exists in the login form where user input is directly concatenated into SQL queries without proper parameterization. An attacker can bypass authentication by injecting SQL syntax into the username or password fields. This allows unauthorized access to user accounts and sensitive data stored in the database. The vulnerability can also be used to extract database credentials and perform privilege escalation attacks. The affected component handles user authentication and authorization, making this a critical security issue. Attackers can retrieve plaintext passwords, modify user permissions, or extract confidential information like API keys and tokens from the database. The attack requires only network access to the login endpoint and works with standard SQL injection payloads. Database tables containing user credentials are directly accessible through this vulnerability.",
+    "affected_versions": ["1.4", "1.5"],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+    "vulnerability_type": "sql_injection"
+  },
+  {
+    "id": "CVE-2024-9012",
+    "severity": "MEDIUM",
+    "score": 6.5,
+    "description": "Cryptographic weakness in DataEncryption library v3.2. The implementation uses a weak random number generator for cryptographic key generation. The vulnerability allows attackers to predict encryption keys through statistical analysis of generated keystreams. This affects all cryptographic operations performed by applications using this library including AES encryption configuration, RSA key generation, and secure token creation. The weak random source is seeded from system time with insufficient entropy sources. An attacker with knowledge of approximate key generation time can brute force the weak keyspace. This vulnerability impacts the confidentiality of all encrypted data protected by keys generated with this library. Database encryption, file encryption, and API token generation are all affected. Recommendation is to upgrade to version 3.3 or later and regenerate all cryptographic keys.",
+    "affected_versions": ["3.0", "3.1", "3.2"],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "crypto"
+  }
+]
