@@ -22,6 +22,9 @@ Educational repository with practical examples for learning LLM engineering patt
 | **06_evals** | LLM-as-Judge, Offline RAG Metrics | llm_as_judge.py, rag_metrics.py |
 | **07_sdd** | Spec-Driven Development | spec_driven_analysis.py, spec_example.md |
 | **08_agentic_platforms** | Kiro/Claude: Skills, Hooks, Specs, MCP, Subagents | README.md (conceptual) |
+| **09_guardrails** | Prompt Injection, PII, Jailbreak (OWASP LLM) | input_guardrails.py, output_guardrails.py |
+| **10_structured_output** | JSON Schema, Pydantic Validation, Retry | schema_extraction.py, retry_parser.py |
+| **11_memory** | Short-term (sliding window) & Long-term (semantic) | memory_store.py, long_term_memory.py |
 | **utils/** | Shared utilities | centralized reusable modules |
 
 ---
@@ -210,6 +213,21 @@ Configure in `.env` file. See `.env.example` for all options.
 
 08_agentic_platforms/           # Working with Kiro & Claude (conceptual)
 └── README.md                  # Skills, hooks, specs, MCP, subagents
+
+09_guardrails/                  # LLM security (OWASP LLM Top 10)
+├── input_guardrails.py        # Block prompt injection / PII before the LLM
+├── output_guardrails.py       # Detect prompt leakage / out-of-scope output
+└── README.md
+
+10_structured_output/           # Reliable structured output
+├── schema_extraction.py       # Pydantic schema -> validate -> retry on failure
+├── retry_parser.py            # Generic parse-validate-retry helper
+└── README.md
+
+11_memory/                      # Conversational memory
+├── memory_store.py            # Sliding window + summarization (short-term)
+├── long_term_memory.py        # Semantic recall over the knowledge base
+└── README.md
 
 data/
 ├── chroma/                    # Local Chroma database
@@ -595,6 +613,18 @@ All settings are managed in `utils/config.py` using Pydantic:
 - **Skills, Hooks, Specs/Steering, MCP tools, Subagents**: how you extend and operate coding agents
 - **Model vs. agent**: the loop, tools and guardrails that turn a model into an agent
 
+### Module 9: Guardrails & Security
+- **Input guardrails**: block prompt injection and PII before the LLM sees it
+- **Output guardrails**: detect system-prompt leakage and out-of-scope responses (OWASP LLM Top 10)
+
+### Module 10: Structured Output
+- **Schema-constrained output**: force JSON that validates against a Pydantic model
+- **Validate & retry**: re-prompt with the validation error until the output conforms
+
+### Module 11: Memory
+- **Short-term**: sliding window of turns + summarization when it overflows
+- **Long-term**: semantic recall over a knowledge base to inject relevant context
+
 ---
 
 ## Architecture Decisions
@@ -915,6 +945,38 @@ python -m 07_sdd.spec_driven_analysis
 # Conceptual module — no script to run.
 # Read: 08_agentic_platforms/README.md
 #   Skills, Hooks, Specs/Steering, MCP tools, Subagents
+```
+
+### Day 9 — Guardrails & Security
+
+**All Day:**
+```powershell
+# Both run without Ollama (deterministic guardrails)
+python -m 09_guardrails.input_guardrails    # block injection / PII before the LLM
+python -m 09_guardrails.output_guardrails   # catch prompt leakage / out-of-scope
+# Read: 09_guardrails/README.md
+```
+
+### Day 10 — Reliable Structured Output
+
+**All Day:**
+```powershell
+# Deterministic self-test of the parse-validate-retry helper (no Ollama):
+python -m 10_structured_output.retry_parser
+# Full schema extraction with retry (requires Ollama):
+python -m 10_structured_output.schema_extraction
+# Read: 10_structured_output/README.md
+```
+
+### Day 11 — Memory
+
+**All Day:**
+```powershell
+# Short-term window + summarization trigger (no Ollama):
+python -m 11_memory.memory_store
+# Long-term semantic recall (retrieval runs without Ollama):
+python -m 11_memory.long_term_memory
+# Read: 11_memory/README.md
 ```
 
 ---
