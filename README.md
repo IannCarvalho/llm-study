@@ -711,20 +711,21 @@ For detailed troubleshooting of LLM setups, see **[LLM_SETUP.md](LLM_SETUP.md#-t
 
 ## 🎯 Learning Roadmap (Suggested Study Order)
 
+> Run each example as a package from the project root (`$env:PYTHONPATH = "."` on PowerShell, `export PYTHONPATH="."` on Bash). The commands below use the module form that works regardless of OS.
+
 ### Day 1 — Foundation: Vector Databases
 
 **Morning:**
 ```powershell
 # Understand embeddings and vectors first
-python 01_vector_databases/embeddings_basics.py
-python 01_vector_databases/chunking_strategies.py
+python -m 01_vector_databases.embeddings_basics
+python -m 01_vector_databases.chunking_strategies
 ```
 
 **Afternoon:**
 ```powershell
-# See it all come together in RAG
-python 01_vector_databases/hybrid_search.py
-python 01_vector_databases/rag_pipeline.py
+# See it all come together in hybrid search (keyword + semantic + RRF)
+python -m 01_vector_databases.hybrid_search
 # Read: 01_vector_databases/README.md
 ```
 
@@ -733,40 +734,54 @@ python 01_vector_databases/rag_pipeline.py
 **Morning:**
 ```powershell
 # ReAct: Reasoning + Action pattern
-python 02_agentic_ai_basics/react_pattern.py
+python -m 02_agentic_ai_basics.react_pattern
 ```
 
 **Afternoon:**
 ```powershell
 # Tool use: Function calling
-python 02_agentic_ai_basics/tool_use.py
+python -m 02_agentic_ai_basics.tool_use
 # Read: 02_agentic_ai_basics/README.md
 ```
 
-### Day 3 — Advanced: LangGraph + Production
+### Day 3 — Orchestration: LangGraph
 
 **Morning:**
 ```powershell
-# State machines with LangGraph
-python 03_advanced_workflows/langgraph_example.py
+# State machines with LangGraph — linear pipeline
+python -m 03_langgraph.langgraph_basics
 ```
 
 **Afternoon:**
 ```powershell
-# RAG with local DB
-python 03_advanced_workflows/chroma_rag.py
-python 03_advanced_workflows/inspect_chroma.py
-# Optional: python 03_advanced_workflows/setup_pinecone.py (requires API key)
+# Conditional routing (multi-path workflows)
+python -m 03_langgraph.langgraph_conditional
+# Read: 03_langgraph/README.md
 ```
 
-### Day 4 — Observability: Debugging & Monitoring
+### Day 4 — Advanced: RAG with Production Vector DBs
+
+**Morning:**
+```powershell
+# RAG with a local vector DB (Chroma)
+python -m 04_advanced_workflows.chroma_rag
+```
+
+**Afternoon:**
+```powershell
+# RAG with a cloud vector DB (Pinecone — requires PINECONE_API_KEY)
+python -m 04_advanced_workflows.pinecone_rag
+# Read: 04_advanced_workflows/README.md
+```
+
+### Day 5 — Observability: Debugging & Monitoring
 
 **All Day:**
 ```powershell
-# Monitor your agents
-python 04_observability/langsmith_example.py
-python 04_observability/langfuse.py
-# Read: 04_observability/README.md
+# Monitor and trace your agents
+python -m 05_observability.langsmith_demo
+python -m 05_observability.langfuse_demo
+# Read: 05_observability/README.md
 ```
 
 **Advanced Practice:**
