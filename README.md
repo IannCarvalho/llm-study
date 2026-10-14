@@ -713,6 +713,30 @@ For detailed troubleshooting of LLM setups, see **[LLM_SETUP.md](LLM_SETUP.md#-t
 
 > Run each example as a package from the project root (`$env:PYTHONPATH = "."` on PowerShell, `export PYTHONPATH="."` on Bash). The commands below use the module form that works regardless of OS.
 
+### Day 0 — Foundation: Prompting (Pré-requisito)
+
+> **Novo tópico (conceitual + exercício).** Antes de recuperar contexto ou dar
+> ferramentas ao modelo, você precisa saber pedir bem. Esta é a camada que todos
+> os módulos seguintes assumem. Ainda não há script dedicado no repositório —
+> comece pela leitura e faça o exercício sobre a base de CVEs.
+
+**Conceitos:**
+- Zero-shot vs. few-shot (k-shot)
+- Role prompting (definir papel/persona do modelo)
+- Chain-of-Thought (CoT): fazer o modelo "pensar antes de responder"
+- Contrato + contraste: dizer o que fazer **e** o que não fazer
+- Saída estruturada (JSON mode) para integrar com código
+
+**Exercício prático:**
+```powershell
+# Compare variações de prompt sobre o MESMO CVE e observe a diferença de saída:
+#   1. zero-shot:  "Resuma este CVE."
+#   2. role:       "Você é um analista de segurança. Resuma este CVE para um gestor."
+#   3. CoT:        "Analise passo a passo a severidade deste CVE e então conclua."
+#   4. estruturado:"Responda em JSON: {id, severidade, resumo, acao_recomendada}"
+# Use o utils.llm_client (get_llm_client) e um CVE de utils/data/cves.json.
+```
+
 ### Day 1 — Foundation: Vector Databases
 
 **Morning:**
@@ -744,6 +768,24 @@ python -m 02_agentic_ai_basics.tool_use
 # Read: 02_agentic_ai_basics/README.md
 ```
 
+**Extra — MCP (Model Context Protocol):**
+
+> **Novo tópico (conceitual + exercício).** Function calling cru é o "antes";
+> o MCP é o padrão de fato (Anthropic, OpenAI e esta própria stack usam) para
+> expor ferramentas, recursos e prompts a um agente de forma padronizada e
+> reutilizável — em vez de reimplementar o wiring de tool use a cada projeto.
+
+**Conceitos:**
+- Por que padronizar a interface agente ↔ sistema (ACI — Agent-Computer Interface)
+- Server / Client / Resource / Prompt
+- Como nomear e desenhar boas tools (nomes claros, escopo mínimo, erros úteis)
+
+**Exercício prático:**
+```powershell
+# Exponha o seu utils.tools.search_cve como um MCP server mínimo e chame-o
+# por um cliente MCP — reaproveitando a MESMA base de CVEs dos outros módulos.
+```
+
 ### Day 3 — Orchestration: LangGraph
 
 **Morning:**
@@ -757,6 +799,29 @@ python -m 03_langgraph.langgraph_basics
 # Conditional routing (multi-path workflows)
 python -m 03_langgraph.langgraph_conditional
 # Read: 03_langgraph/README.md
+```
+
+### Day 3.5 — Context Engineering (Novo)
+
+> **Novo tópico (conceitual + exercício).** Depois de orquestrar fluxos
+> (LangGraph) e antes de RAG de produção, entenda **engenharia de contexto** — a
+> skill que substituiu "prompt engineering" como diferencial sênior em AI
+> Engineering. Você já pratica partes dela sem nomear: RAG é *Select*,
+> observabilidade ajuda a enxergar *context rot*.
+
+**Conceitos:**
+- Janela de contexto e por que o mecanismo de atenção não escala
+- *Context rot* e *lost in the middle* (informação no meio do contexto é ignorada)
+- 4 modos de falha: *poisoning*, *distraction*, *confusion*, *clash*
+- As 4 estratégias: **Write, Select, Compress, Isolate**
+
+**Exercício prático:**
+```powershell
+# Demonstre "context distraction" com o SEU dado:
+#   1. Pergunte sobre um CVE específico passando só ele no contexto.
+#   2. Repita inflando o contexto com dezenas de CVEs irrelevantes.
+#   3. Compare qualidade/latência das respostas — veja a degradação.
+# Reutilize utils.data_loader para montar os dois cenários.
 ```
 
 ### Day 4 — Advanced: RAG with Production Vector DBs
