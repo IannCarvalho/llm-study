@@ -14,11 +14,15 @@ Educational repository with practical examples for learning LLM engineering patt
 
 | Module | Topics | Files |
 |--------|--------|-------|
-| **01_vector_databases** | Embeddings, Chunking, RAG, Hybrid Search | embeddings_basics.py, chunking_strategies.py, hybrid_search.py, rag_pipeline.py |
-| **02_agentic_ai_basics** | ReAct, Tool Use, Conversation Management | react_pattern.py, tool_use.py |
-| **04_advanced_workflows** | RAG + Agents, Production DBs | chroma_rag.py, pinecone_rag.py, setup_pinecone.py |
-| **05_observability** | LangSmith, LangFuse, Tracing & Debugging | langsmith_example.py, langfuse.py |
-| **utils/** | Shared utilities | 5 reusable modules |
+| **01_vector_databases** | Embeddings, Chunking, Hybrid Search (RRF) | embeddings_basics.py, chunking_strategies.py, hybrid_search.py |
+| **02_agentic_ai_basics** | ReAct, Tool Use | react_pattern.py, tool_use.py |
+| **03_langgraph** | Linear & Conditional Workflows | langgraph_basics.py, langgraph_conditional.py |
+| **04_advanced_workflows** | RAG + Production Vector DBs | chroma_rag.py, pinecone_rag.py |
+| **05_observability** | LangSmith, LangFuse, Tracing & Debugging | langsmith_demo.py, langfuse_demo.py |
+| **06_evals** | LLM-as-Judge, Offline RAG Metrics | llm_as_judge.py, rag_metrics.py |
+| **07_sdd** | Spec-Driven Development | spec_driven_analysis.py, spec_example.md |
+| **08_agentic_platforms** | Kiro/Claude: Skills, Hooks, Specs, MCP, Subagents | README.md (conceptual) |
+| **utils/** | Shared utilities | centralized reusable modules |
 
 ---
 
@@ -193,6 +197,19 @@ Configure in `.env` file. See `.env.example` for all options.
 ├── langsmith_demo.py          # LangSmith tracing example
 ├── langfuse_demo.py           # LangFuse integration
 └── README.md
+
+06_evals/                       # Evaluating LLM & agents
+├── llm_as_judge.py            # Score generated output with a second LLM
+├── rag_metrics.py             # Offline retrieval metrics (no LLM needed)
+└── README.md
+
+07_sdd/                         # Spec-Driven Development
+├── spec_driven_analysis.py    # Spec object -> prompt -> validate output
+├── spec_example.md            # Human-readable spec artifact
+└── README.md
+
+08_agentic_platforms/           # Working with Kiro & Claude (conceptual)
+└── README.md                  # Skills, hooks, specs, MCP, subagents
 
 data/
 ├── chroma/                    # Local Chroma database
@@ -566,6 +583,18 @@ All settings are managed in `utils/config.py` using Pydantic:
 - **LangSmith**: LLM tracing and debugging
 - **LangFuse**: Detailed analytics and evaluation
 
+### Module 6: Evals
+- **Offline RAG metrics**: precision@k and a groundedness proxy (deterministic, no LLM)
+- **LLM-as-judge**: scoring generated output with a second, rubric-driven LLM call
+
+### Module 7: Spec-Driven Development
+- **Spec as artifact**: structured spec that drives and validates the agent's output
+- **With-spec vs. without-spec**: the contrast against free-form prompting
+
+### Module 8: Agentic Platforms (Kiro & Claude)
+- **Skills, Hooks, Specs/Steering, MCP tools, Subagents**: how you extend and operate coding agents
+- **Model vs. agent**: the loop, tools and guardrails that turn a model into an agent
+
 ---
 
 ## Architecture Decisions
@@ -853,6 +882,39 @@ python -m 05_observability.langfuse_demo
 ```powershell
 # Build custom workflows combining everything
 # Experiment, modify code, understand deeply
+```
+
+### Day 6 — Evaluation: Measuring Quality
+
+**Morning:**
+```powershell
+# Offline retrieval metrics (deterministic, no Ollama needed)
+python -m 06_evals.rag_metrics
+```
+
+**Afternoon:**
+```powershell
+# LLM-as-judge: score generated output with a second LLM (requires Ollama)
+python -m 06_evals.llm_as_judge
+# Read: 06_evals/README.md
+```
+
+### Day 7 — Spec-Driven Development
+
+**All Day:**
+```powershell
+# Spec drives and validates the agent's output (with-spec vs. without-spec)
+python -m 07_sdd.spec_driven_analysis
+# Read: 07_sdd/README.md and 07_sdd/spec_example.md
+```
+
+### Day 8 — Working with Agentic Platforms (Kiro & Claude)
+
+**All Day:**
+```powershell
+# Conceptual module — no script to run.
+# Read: 08_agentic_platforms/README.md
+#   Skills, Hooks, Specs/Steering, MCP tools, Subagents
 ```
 
 ---
