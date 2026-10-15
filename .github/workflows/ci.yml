@@ -24,12 +24,13 @@ jobs:
         # The repo's full requirements.txt (langchain, chromadb, torch, ...) is
         # heavy and flaky to install in CI. The deterministic tests exercise only
         # the no-LLM code paths, so we install just what those modules import at
-        # import time: pydantic (utils.models), numpy + rank-bm25 +
-        # sentence-transformers (imported at the top of utils.search, which the
-        # evals / reranking / agentic_rag modules import), and ruff + pytest.
+        # import time: pydantic + pydantic-settings (utils.models / utils.config),
+        # numpy + rank-bm25 + sentence-transformers (imported at the top of
+        # utils.search, which the evals / reranking / agentic_rag modules import),
+        # and ruff + pytest.
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pytest pydantic numpy "rank-bm25>=0.2.2" "sentence-transformers>=5.0.0"
+          pip install ruff pytest pydantic pydantic-settings numpy "rank-bm25>=0.2.2" "sentence-transformers>=5.0.0"
 
       - name: Ruff lint
         run: ruff check .
