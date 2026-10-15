@@ -17,7 +17,7 @@ Educational repository with practical examples for learning LLM engineering patt
 | **01_vector_databases** | Embeddings, Chunking, Hybrid Search (RRF) | embeddings_basics.py, chunking_strategies.py, hybrid_search.py |
 | **02_agentic_ai_basics** | ReAct, Tool Use | react_pattern.py, tool_use.py |
 | **03_langgraph** | Linear & Conditional Workflows | langgraph_basics.py, langgraph_conditional.py |
-| **04_advanced_workflows** | RAG + Production Vector DBs | chroma_rag.py, pinecone_rag.py |
+| **04_advanced_workflows** | RAG + Production Vector DBs + Cross-Encoder Reranking | chroma_rag.py, pinecone_rag.py, reranking.py |
 | **05_observability** | LangSmith, LangFuse, Tracing & Debugging | langsmith_demo.py, langfuse_demo.py |
 | **06_evals** | LLM-as-Judge, Offline RAG Metrics | llm_as_judge.py, rag_metrics.py |
 | **07_sdd** | Spec-Driven Development | spec_driven_analysis.py, spec_example.md |
@@ -25,6 +25,7 @@ Educational repository with practical examples for learning LLM engineering patt
 | **09_guardrails** | Prompt Injection, PII, Jailbreak (OWASP LLM) | input_guardrails.py, output_guardrails.py |
 | **10_structured_output** | JSON Schema, Pydantic Validation, Retry | schema_extraction.py, retry_parser.py |
 | **11_memory** | Short-term (sliding window) & Long-term (semantic) | memory_store.py, long_term_memory.py |
+| **12_agentic_rag** | Multi-step retrieval: agent decides when & what to search | agentic_rag.py |
 | **utils/** | Shared utilities | centralized reusable modules |
 
 ---
@@ -194,6 +195,7 @@ Configure in `.env` file. See `.env.example` for all options.
 04_advanced_workflows/          # Vector DB implementations
 ├── chroma_rag.py              # Local vector DB
 ├── pinecone_rag.py            # Cloud vector DB
+├── reranking.py               # Cross-encoder reranking (two-stage retrieval)
 └── README.md
 
 05_observability/               # LangSmith, LangFuse
@@ -227,6 +229,10 @@ Configure in `.env` file. See `.env.example` for all options.
 11_memory/                      # Conversational memory
 ├── memory_store.py            # Sliding window + summarization (short-term)
 ├── long_term_memory.py        # Semantic recall over the knowledge base
+└── README.md
+
+12_agentic_rag/                 # Multi-step retrieval
+├── agentic_rag.py             # Agent decides when & what to search, iteratively
 └── README.md
 
 data/
@@ -625,6 +631,10 @@ All settings are managed in `utils/config.py` using Pydantic:
 - **Short-term**: sliding window of turns + summarization when it overflows
 - **Long-term**: semantic recall over a knowledge base to inject relevant context
 
+### Module 12: Agentic RAG
+- **Multi-step retrieval**: the agent decides when and what to search, iteratively, instead of a single retrieve
+- **Query decomposition**: break a compound question into sub-queries, chain searches, accumulate evidence
+
 ---
 
 ## Architecture Decisions
@@ -895,6 +905,8 @@ python -m 04_advanced_workflows.chroma_rag
 ```powershell
 # RAG with a cloud vector DB (Pinecone — requires PINECONE_API_KEY)
 python -m 04_advanced_workflows.pinecone_rag
+# Cross-encoder reranking after hybrid search (needs sentence-transformers; degrades without it)
+python -m 04_advanced_workflows.reranking
 # Read: 04_advanced_workflows/README.md
 ```
 
@@ -977,6 +989,16 @@ python -m 11_memory.memory_store
 # Long-term semantic recall (retrieval runs without Ollama):
 python -m 11_memory.long_term_memory
 # Read: 11_memory/README.md
+```
+
+### Day 12 — Agentic RAG: Multi-Step Retrieval
+
+**All Day:**
+```powershell
+# Agent decomposes a compound query, chains searches, accumulates evidence.
+# Decision + retrieval path runs without Ollama (generation degrades gracefully):
+python -m 12_agentic_rag.agentic_rag
+# Read: 12_agentic_rag/README.md
 ```
 
 ---
