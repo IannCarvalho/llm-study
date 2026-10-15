@@ -5,3 +5,50 @@ pythonVersion = "3.11"
 [build-system]
 requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+# The suite is run as `python -m pytest tests/` from the repo root. Two paths
+# must be importable:
+#   "."      so the modules under test resolve `from utils.X import Y` and the
+#            data loader finds utils/data (the project is run as a package from
+#            the repo root with PYTHONPATH=root).
+#   "tests"  so each test's `from conftest import load_module` resolves; tests/
+#            is a package (__init__.py), so pytest does not auto-insert it.
+# `pythonpath` is the documented pytest 7+ mechanism for exactly this, and is
+# what tests/conftest.py's own docstring expects.
+pythonpath = [".", "tests"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# Pragmatic rule set: pyflakes (F) catches real bugs (undefined names, unused
+# imports), pycodestyle errors (E) catch structural problems. This is real
+# linting, not a rubber stamp.
+select = ["E", "F", "W"]
+# Ignored repo-wide, and only cosmetics:
+#   E501 line-too-long  - a handful of long literal strings in existing study
+#                         modules; wrapping them buys nothing and this is a
+#                         learning repo, not a style showcase.
+#   W291/W293/W292      - trailing / blank-line whitespace and missing final
+#                         newline: pure cosmetics, pre-existing, not worth a
+#                         mass rewrite of untouched module code.
+ignore = ["E501", "W291", "W293", "W292"]
+
+[tool.ruff.lint.per-file-ignores]
+# These existing modules carry a pre-existing unused-import (F401). They are not
+# part of this change and are intentionally left untouched, so F401 is silenced
+# for them specifically rather than disabled everywhere -- new code (including
+# tests/) is still checked for unused imports.
+"11_memory/memory_store.py" = ["F401"]
+"12_agentic_rag/agentic_rag.py" = ["F401"]
+"utils/data_loader.py" = ["F401"]
+"utils/search.py" = ["F401"]
+# The deterministic tests must call conftest.load_module() to register a
+# digit-prefixed module (e.g. 12_agentic_rag) BEFORE a `from utils...` import
+# that depends on that setup, so a module-level import deliberately follows a
+# statement. That makes E402 a false positive here, not a smell -- E402 stays
+# active for all real module code.
+"tests/*" = ["E402"]
