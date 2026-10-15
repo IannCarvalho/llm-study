@@ -1,9 +1,15 @@
 # AI Engineering Study Repository: LangGraph, Vector Databases & Observability
 
+[![CI](https://github.com/IannCarvalho/llm-study/actions/workflows/ci.yml/badge.svg)](https://github.com/IannCarvalho/llm-study/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230.svg)](https://github.com/astral-sh/ruff)
+
+
 Educational repository with practical examples for learning LLM engineering patterns:
 - Ollama + Mistral for local LLM (no API keys required)
 - Chroma (local) + Pinecone (cloud) for vector databases
-- 5 learning modules: Vector Databases, Agentic AI, LangGraph, Advanced Workflows, Observability
+- 12 learning modules: Prompting, Vector Databases, Agentic AI, LangGraph, Context Engineering, Advanced Workflows, Observability, Evals, SDD, Agentic Platforms, Guardrails, Structured Output, Memory & Agentic RAG
 - Single unified data source (CVE database) across all examples
 - Reciprocal Rank Fusion for hybrid keyword + semantic search
 - Reusable utilities in `utils/` folder
