@@ -1,360 +1,254 @@
-# Module 01: Vector Databases
+# 01 — Vector Databases (busca para RAG)
 
-Learn keyword search, semantic embeddings, and hybrid retrieval for RAG applications.
+> Pré-requisitos: roda **sem LLM**, sem rede e sem chave de API. Python 3.11.
+> Os três scripts são determinísticos. As partes de **embeddings** (semantic/hybrid)
+> baixam um modelo do Sentence Transformers na primeira execução — isso exige o
+> pacote `sentence-transformers` e, no primeiro uso, acesso à internet para o
+> download do modelo; depois ele fica em cache e roda offline. Nenhum passo precisa
+> do Ollama.
 
-## Overview
+Este módulo mostra como recuperar os documentos certos para alimentar um sistema de
+RAG (*retrieval-augmented generation*): busca por palavra-chave (BM25), busca por
+significado (embeddings) e a combinação das duas (busca híbrida). Todos os exemplos
+usam a mesma base de três **registros sintéticos** de vulnerabilidades fictícias
+(`utils/data/cves.json`), para você focar nas estratégias de busca em vez de no setup
+dos dados.
 
-Vector databases are the core of modern retrieval-augmented generation (RAG) systems. This module teaches:
+## Por que importa
 
-1. **Keyword Search**: BM25 for exact and near-exact matches
-2. **Semantic Embeddings**: Neural models for meaning-based retrieval
-3. **Similarity Search**: Find semantically related documents
-4. **Chunking**: Split large documents into manageable pieces
-5. **Hybrid Retrieval**: Combine keyword and semantic search
-6. **RAG Pipeline**: Complete context-augmented generation flow
+A geração de um LLM é tão boa quanto o contexto que você entrega a ele. Recuperar os
+trechos errados (ou trechos demais) degrada a resposta e gasta tokens. As três técnicas
+deste módulo cobrem os dois lados do problema de recuperação:
 
-## Learning Path
+- **BM25 (palavra-chave)** acerta identificadores exatos — um ID de CVE, um nome de
+  função, um número de versão — que um modelo semântico costuma diluir.
+- **Embeddings (semântico)** acertam paráfrases e sinônimos — "as chaves são
+  previsíveis porque a aleatoriedade é fraca" encontra a CVE de criptografia mesmo
+  sem repetir nenhuma palavra da descrição.
+- **Busca híbrida** funde as duas, premiando documentos que aparecem bem ranqueados
+  em qualquer um dos métodos.
 
-### Part 1: Foundations (Keyword Search)
+## Conceitos
 
-**[embeddings_basics.py](embeddings_basics.py)** - Understand TF-IDF keyword retrieval
-- **Term Frequency (TF)**: How often a term appears in a document
-- **Inverse Document Frequency (IDF)**: How rare a term is across all documents
-- **TF-IDF Score**: `score = TF × IDF` (prioritizes specific, important terms)
-- Exact and near-exact matching
-- Ranking documents by relevance
-- Clear output labels for understanding
+### BM25 (Best Matching 25)
+Função de ranqueamento padrão da indústria para busca por palavra-chave (esparsa),
+usada por motores como Elasticsearch e Lucene. É uma evolução do TF-IDF que considera
+frequência do termo com **saturação** (repetir uma palavra não aumenta o score
+linearmente), **IDF** (termos raros valem mais) e **normalização pelo tamanho do
+documento** (evita viés a favor de documentos longos). Os parâmetros `k1` e `b`
+controlam, respectivamente, a saturação de frequência e o peso do tamanho. Rápido e
+interpretável, é excelente para correspondências exatas e quase-exatas. Fórmula e
+derivação em [Referências](#referências).
 
-Run: `python embeddings_basics.py`
+### Embeddings e similaridade de cosseno
+Um modelo neural transforma cada texto em um vetor denso que captura significado, não
+só as palavras. A proximidade entre dois textos é medida pela **similaridade de
+cosseno** (o cosseno do ângulo entre os vetores): próximo de `1` = muito relacionados,
+próximo de `0` = pouco relacionados. Isso faz a busca semântica reconhecer sinônimos e
+reformulações que o BM25 não alcança. O modelo usado aqui é o `all-MiniLM-L6-v2`
+(pequeno e rápido, **384 dimensões** — ver [Referências](#referências)).
 
-### Part 2: Document Processing (Chunking)
+### Reciprocal Rank Fusion (RRF)
+A busca híbrida combina os rankings de BM25 e de embeddings com **RRF**, que soma, por
+documento, `1/(k + posição)` de cada ranking (com `k = 60`):
 
-**[chunking_strategies.py](chunking_strategies.py)** - Text splitting strategies
-- Fixed-size chunking: Fast but may break mid-sentence
-- Sentence-based: Respects sentence boundaries
-- Recursive chunking (RECOMMENDED): Preserves document structure
-
-Uses `chunking_utils.py` unified interface:
-```python
-from chunking_utils import chunk_text
-
-chunks = chunk_text(text, strategy='recursive', chunk_size=500, overlap=50)
 ```
-
-Run: `python chunking_strategies.py`
-
-### Part 3: Advanced Retrieval (Hybrid Search)
-
-**[hybrid_search.py](hybrid_search.py)** - Combine keyword and semantic search
-- **Keyword Search (TF-IDF)**: Exact matching for identifiers (e.g., "CVE-2024-1234")
-- **Semantic Search**: Neural embeddings for conceptual matching (e.g., "remote code execution")
-- **Reciprocal Rank Fusion (RRF)**: Intelligent fusion combining both rankings
-
-How it works:
-```
-TF-IDF Rankings        Semantic Rankings
-       ↓                       ↓
+Ranking BM25          Ranking semântico
+     ↓                       ↓
 [doc1, doc2, doc3]   [doc2, doc1, doc4]
-       └────────────┬────────────┘
-         RRF Fusion (formula: 1/(k+rank))
-              ↓
-      [doc1, doc2, doc4] ← Final ranking
+     └───────────┬───────────┘
+      Fusão RRF: 1/(60 + posição)
+            ↓
+    [doc1, doc2, doc4]  ← ranking final
 ```
 
-RRF advantages:
-- **No parameter tuning** (unlike weighted averages)
-- **Robust** across different score scales
-- **Rewards documents** appearing in both rankings
-- Formula: `score = 1/(60 + rank_keyword) + 1/(60 + rank_semantic)`
+Vantagens do RRF frente a uma média ponderada:
+- **Sem ajuste de parâmetro** (não há pesos tipo 70/30 para calibrar);
+- **Robusto** a escalas de score diferentes, sem precisar normalizar;
+- **Premia** documentos que aparecem bem em ambos os rankings;
+- fórmula: `score = 1/(60 + posição_bm25) + 1/(60 + posição_semantic)`.
 
-Run: `python hybrid_search.py`
+### Chunking (divisão de documentos)
+Documentos grandes não cabem no limite de contexto do modelo de embedding, então são
+divididos em pedaços (*chunks*) menores e sobrepostos. As três estratégias têm
+compromissos diferentes:
+- **fixed**: tamanho fixo — rápido e simples, mas pode cortar no meio de uma frase;
+- **sentence**: respeita o limite das frases — mais natural, tamanhos variáveis;
+- **recursive** (recomendado): divisão hierárquica (parágrafos → frases → palavras),
+  preservando a estrutura do documento.
 
-### Part 4: Complete Pipeline (RAG)
+### Custo e escala
+- **BM25** é barato: o custo cresce com o vocabulário e com o número de termos da query.
+- **Busca semântica**: o gargalo é a inferência do modelo de embedding; a comparação por
+  cosseno contra todos os documentos é linear no tamanho da base.
+- **Híbrida**: herda o custo da parte semântica.
+- **Chunking**: `recursive` é mais lento que `fixed`, em troca de preservar a estrutura.
+- **Em escala** (milhões de documentos), varrer todos os vetores deixa de ser viável: entra
+  um banco vetorial com índice aproximado (Pinecone, Weaviate, Qdrant) ou uma biblioteca
+  como FAISS, com modelos do Sentence Transformers como `all-MiniLM-L6-v2` (o padrão deste
+  repo) ou `all-mpnet-base-v2`. O módulo [04](../04_advanced_workflows/README.md) mostra
+  Chroma e Pinecone na prática.
 
-**[rag_pipeline.py](rag_pipeline.py)** - End-to-end RAG application
-1. **Store**: Add vulnerability knowledge to vector database
-2. **Retrieve**: Search for relevant documents
-3. **Augment**: Build context-rich prompt
-4. **Generate**: LLM answers informed by actual data
+## Arquivos
 
-Uses `vector_store.py` SimpleVectorStore:
-```python
-from vector_store import SimpleVectorStore
+| Arquivo | O que demonstra |
+|---------|-----------------|
+| [embeddings_basics.py](embeddings_basics.py) | BM25 (Partes 1–2) e, em seguida, busca semântica por cosseno nos mesmos documentos (Parte 3), lado a lado. |
+| [chunking_strategies.py](chunking_strategies.py) | As três estratégias de chunking sobre um documento de exemplo, comparando nº de chunks e tamanho médio. |
+| [hybrid_search.py](hybrid_search.py) | BM25 + semântico fundidos com RRF, usando os motores de `utils.search`. |
 
-db = SimpleVectorStore()
-db.add_documents({"doc-1": "text...", "doc-2": "text..."})
-db.index()
-results = db.search("query", top_k=3)
-```
+A base de dados e os motores de busca são compartilhados por todos os módulos:
 
-Run: `python rag_pipeline.py`
+- `utils/data/cves.json` — três registros sintéticos de produtos fictícios
+  (WebServer v2.1, AuthService v1.5, DataEncryption v3.2), carregados por
+  `utils.data_loader` (`load_cves`, `get_cve_by_id`, `search_cves`, `get_cve_documents`);
+- `utils.search.create_search_engine("bm25" | "semantic" | "hybrid")` — fábrica dos
+  motores `BM25Search`, `SemanticSearch` e `HybridSearch` (`hybrid_search.py` usa as
+  classes diretamente);
+- `utils.chunking_utils` — a lógica de chunking usada por `chunking_strategies.py`;
+- `utils.semantic_embeddings` — `embed_text` / `embed_texts` (Sentence Transformers),
+  usados pela Parte 3 de `embeddings_basics.py` e pelo motor semântico.
 
-## Shared Data
+> Observação: `utils/rag_pipeline.py` é uma **biblioteca** (a classe `ChromaRAGPipeline`,
+> usada pelo RAG com Chroma do [módulo 04](../04_advanced_workflows/README.md)), não um
+> script deste módulo — não há nada dele para rodar aqui.
 
-All examples in this module use the same unified CVE data source (`utils/data/cves.json`):
+## Como rodar
 
-```python
-from utils.data_loader import load_cves, get_cve_documents
-
-# Load CVE vulnerability data
-cves = load_cves()
-
-# Get formatted documents for search/RAG
-documents = get_cve_documents(cves)
-```
-
-This allows you to focus on learning search strategies without worrying about data setup.
-
-## Reciprocal Rank Fusion (RRF)
-
-The hybrid search implementation uses RRF instead of simple weighted averaging because:
-
-1. **No Parameter Tuning**: RRF doesn't require weight adjustment (unlike 60/40 splits)
-2. **Robust**: Works across different score scales without normalization
-3. **Principled**: Based on information retrieval theory
-4. **Educational**: Teaches modern production retrieval techniques
-
-Formula: `score = 1/(k+rank_keyword) + 1/(k+rank_semantic)` where k=60
-
-# Embed texts
-embeddings = embedder.embed_texts(list_of_strings)    # Returns: np.ndarray
-single_embedding = embedder.embed_text(single_string)  # Returns: np.ndarray
-
-# Models:
-# - all-MiniLM-L6-v2: Small, fast (384 dimensions)
-# - all-mpnet-base-v2: Large, high quality (768 dimensions)
-```
-
-### chunking_utils.py - Document Splitting
-
-```python
-from chunking_utils import chunk_text
-
-chunks = chunk_text(
-    text,
-    strategy='recursive',    # 'fixed', 'sentence', or 'recursive'
-    chunk_size=500,          # Target size per chunk
-    overlap=50               # Overlap between consecutive chunks
-)
-```
-
-Strategies:
-- **'fixed'**: Simple fixed-size (fast, may break concepts)
-- **'sentence'**: Respect sentence boundaries (slower)
-- **'recursive'**: Hierarchical splitting (RECOMMENDED, best preservation of structure)
-
-### vector_store.py - Vector Database
-
-```python
-from vector_store import SimpleVectorStore
-
-db = SimpleVectorStore()
-db.add_document("doc-id", "Document text...")
-db.add_documents({"id1": "text1", "id2": "text2"})
-db.index()                          # Build embeddings
-results = db.search("query", top_k=3)  # Returns: [{"id", "text", "similarity"}, ...]
-```
-
-## Architecture Diagram
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    RAG Pipeline                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  Documents  ──→  Chunking  ──→  Embeddings  ──→  Storage    │
-│                  (chunking_utils)  (semantic)  (DB)          │
-│                                                               │
-│                        ↓                                      │
-│                    Query Input                               │
-│                        ↓                                      │
-│  BM25 + Semantic ──→  Search  ──→  Fuse  ──→  Retrieve     │
-│  (hybrid)             (ranking)   (weight)  (context)        │
-│                        ↓                                      │
-│                      LLM (answer)                            │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
-
-Core Components:
-- semantic_embeddings.py: SemanticEmbedder (Sentence Transformers)
-- chunking_utils.py: chunk_text() with 3 strategies
-- vector_store.py: SimpleVectorStore (in-memory DB)
-- hybrid_search.py: BM25 + Semantic fusion
-```
-
-## Exercises
-
-### Easy
-
-1. **Modify embeddings_basics.py**: Change search queries and observe BM25 scores. Try exact matches (e.g., "CVE-2024") vs conceptual searches.
-
-2. **Chunking Strategy**: Run chunking_strategies.py and compare number of chunks and sizes for each strategy. Which breaks mid-sentence?
-
-3. **Vector Store**: Create a custom knowledge base (not security) and search it using rag_pipeline.py.
-
-### Medium
-
-4. **Hybrid Search Weight**: In hybrid_search.py, modify the weights dict (0.3 keyword / 0.7 semantic vs 0.7 / 0.3). How do results change?
-
-5. **Semantic vs Keyword**: Add a query to hybrid_search.py that has exact keyword matches (e.g., "CVE-2024") vs conceptual similarity (e.g., "buffer overflow"). How do results differ?
-
-6. **Semantic Model Selection**: In hybrid_search.py, try both "all-MiniLM-L6-v2" and "all-mpnet-base-v2". What's the quality/speed tradeoff?
-
-### Hard
-
-7. **Production Vector Database**: Replace SimpleVectorStore with real ChromaDB/Pinecone. Keep the interface identical. What changes in import statements? What performance improvements do you see?
-
-8. **Semantic Caching**: Cache embeddings for frequently-searched documents to avoid re-computing. Modify vector_store.py to persist embeddings to disk.
-
-9. **Multi-Modal Embeddings**: Use sentence-transformers for multi-modal (text + image) embeddings. Support embedding images and searching across modalities.
-
-10. **RAG Evaluation**: Add metrics to rag_pipeline.py: precision (are retrieved docs relevant?), recall (did we miss important docs?), BLEU score on LLM output.
-
-## Running Examples
-
-Set up environment first:
+A partir da **raiz do repositório**, com o `PYTHONPATH` apontando para a raiz. Para o
+setup do provedor de LLM (opcional, não necessário neste módulo), veja
+[../LLM_SETUP.md](../LLM_SETUP.md).
 
 **Windows (PowerShell):**
 ```powershell
-& .\venv\Scripts\Activate.ps1
 $env:PYTHONPATH = "."
-
-# Run examples in order
 python -m 01_vector_databases.embeddings_basics
 python -m 01_vector_databases.chunking_strategies
 python -m 01_vector_databases.hybrid_search
-python -m 01_vector_databases.rag_pipeline
 ```
 
-**Linux/Mac (Bash):**
+**Linux/Mac (bash):**
 ```bash
-source venv/bin/activate
 export PYTHONPATH="."
-
-# Run examples in order
 python -m 01_vector_databases.embeddings_basics
 python -m 01_vector_databases.chunking_strategies
 python -m 01_vector_databases.hybrid_search
-python -m 01_vector_databases.rag_pipeline
 ```
 
-## Key Concepts
+## O que a demo mostra
 
-### BM25 (Best Match 25)
-- Industry standard for keyword/full-text search
-- Probabilistic ranking function
-- Considers term frequency, document length, term rarity
-- Fast and interpretable, excellent for exact/near-exact matches
-- Used by Elasticsearch, Lucene, most search engines
+### `embeddings_basics.py` — BM25 e depois cosseno
+As Partes 1–2 indexam os três registros e ranqueiam por BM25; a Parte 3 reclassifica os
+mesmos documentos por similaridade de cosseno. Saída real (resumida):
 
-### Semantic Embeddings
-- Transform text to vectors using neural models
-- Captures meaning and context (not just keywords)
-- Works well for synonyms and conceptual similarity
-- Requires a model (e.g., Sentence Transformers)
-- Slower than BM25 but much better for semantic understanding
+```
+Part 2: Searching with BM25
+Query: "buffer overflow instruction pointer"
+  1. CVE-2024-1234
 
-### Cosine Similarity
-- Measures angle between vectors (0° = identical, 90° = orthogonal)
-- Ranges from -1 to 1 (typically 0 to 1 for normalized vectors)
-- High similarity (0.9+) = semantically related
-- Low similarity (0.1-) = semantically different
+Part 3: Semantic search with embeddings (all-MiniLM-L6-v2)
+Query: "buffer overflow instruction pointer"
+  BM25 top-1:      CVE-2024-1234
+  Embeddings #1:   CVE-2024-1234 (cosine 0.268)
+  Embeddings #2:   CVE-2024-9012 (cosine 0.142)
+  Embeddings #3:   CVE-2024-5678 (cosine 0.089)
 
-### BM25 (Best Matching 25)
-- Probabilistic keyword search algorithm
-- Accounts for term frequency, document length, term rarity
-- Accounts for document length normalization
-- Industry standard for search engines (Elasticsearch, Lucene)
-
-### Hybrid Search
-- Combines BM25 (keyword) + semantic (embedding) results
-- BM25 finds exact matches, embeddings find conceptual matches
-- Alpha parameter controls the balance (0.5 = equal weight)
-- Useful for security: CVE IDs matter, but so does vulnerability concept
-
-### Chunking Strategies
-- **Fixed**: Simple, uniform, but breaks logical units
-- **Sentence**: Respects boundaries, variable sizes
-- **Recursive**: Best overall, preserves hierarchical structure
-- Overlap preserves context across chunk boundaries
-
-## Troubleshooting
-
-### ImportError: cannot import name 'VectorEmbedder' from 'vector_utils'
-**Solution**: Ensure PYTHONPATH is set to workspace root:
-```powershell
-$env:PYTHONPATH = "."
+Query: "attackers can guess the secret keys because the randomness is poor"
+  BM25 top-1:      CVE-2024-9012
+  Embeddings #1:   CVE-2024-9012 (cosine 0.399)
+  ...
 ```
 
-### ValueError: Index not built
-**Solution**: Call `db.index()` before calling `db.search()`:
-```python
-db.add_documents(docs)
-db.index()  # Build embeddings
-results = db.search("query")
+Repare na segunda consulta: a paráfrase não repete nenhuma palavra da descrição, e
+ainda assim tanto o BM25 quanto o embedding apontam a CVE de criptografia
+(`CVE-2024-9012`) — o cosseno de `0.399` é bem acima dos outros dois.
+
+Se o modelo de embedding não puder ser carregado (offline e sem cache), a Parte 3
+degrada com uma mensagem clara e as Partes 1–2 continuam valendo:
+```
+Embedding model unavailable (<erro>); Parts 1-2 above still ran.
 ```
 
-### similarity score is 0 for all documents
-**Solution**: Check that embeddings have non-zero values. Ensure texts are meaningful (not empty or stop-words only). Debug with:
-```python
-embedder = VectorEmbedder()
-embeddings = embedder.fit_transform(["SQL injection", "database attack"])
-print(embeddings)  # Check values are non-zero
+### `chunking_strategies.py` — comparação das estratégias
+Saída real:
 ```
+Document: 743 characters
 
-## Performance Notes
-
-- **BM25**: O(vocabulary size + query terms). ~100K searches/sec on laptop.
-- **Semantic Embeddings**: Model inference time + O(n) cosine similarity. ~1-10 searches/sec (model dependent).
-- **Hybrid**: Combines both, ~1-10 searches/sec (semantic bottleneck).
-- **Chunking**: Recursive is 2-3x slower than fixed, but preserves structure.
-
-For production (1M+ docs), use:
-- Pinecone, Weaviate, or Qdrant for vector indexing with FAISS
-- Sentence-transformers (all-MiniLM-L6-v2 or all-mpnet-base-v2) for semantic embeddings
-- BM25 or Elasticsearch for keyword search
-- Hybrid approach with proper weight tuning for best results
-
-## Next Steps
-
-After mastering this module:
-- **Module 02**: Learn agentic patterns (ReAct, Tool Use, LangGraph)
-- **Module 03**: Add advanced workflows (multi-step retrieval, reranking)
-- **Module 04**: Add observability (logging, tracing) to RAG pipelines
-- **Production**: Scale with Pinecone, add caching, implement reranking
-
-
-✅ Respeita estrutura do documento (parágrafos inteiros quando possível)
-✅ Cai para frases quando o parágrafo é grande
-✅ Mantém contexto importante coeso
+Strategy: FIXED (Fast, may break mid-sentence)
+  Chunks: 5 | Avg size: 148 chars
+Strategy: SENTENCE (Respects sentences, more natural)
+  Chunks: 3 | Avg size: 247 chars
+Strategy: RECURSIVE (RECOMMENDED, preserves structure)
+  Chunks: 2 | Avg size: 371 chars
 ```
+O mesmo documento de 743 caracteres vira 5, 3 ou 2 chunks conforme a estratégia —
+`fixed` fragmenta mais (e pode cortar frases), `recursive` preserva mais estrutura.
 
----
+### `hybrid_search.py` — BM25 + semântico via RRF
+Saída real:
 ```
+Query: "buffer overflow instruction pointer"
 
----
+  BM25 (Keyword) Results:
+    1. CVE-2024-1234 (score: 0.7244)
+    2. CVE-2024-9012 (score: 0.0000)
 
-## 🎯 O que aprender daqui
+  Semantic (Embeddings) Results:
+    1. CVE-2024-1234 (score: 0.2677)
+    2. CVE-2024-9012 (score: 0.1421)
 
-| Arquivo | Conceito | Tempo | Objetivo |
-|---------|----------|-------|----------|
-| embeddings_basics.py | Vetores + Similaridade | 5 min | Entender a base |
-| chunking_strategies.py | Divisão de documentos | 5 min | Preparar dados |
-| rag_pipeline.py | RAG completo | 10 min | Fluxo end-to-end |
-
-**Caminho de Aprendizado**:
+  RRF Combined Results:
+    1. CVE-2024-1234 (RRF score: 0.0328)
+    2. CVE-2024-9012 (RRF score: 0.0323)
 ```
-1. Rodas embeddings_basics.py (entender vetores)
-2. Rodar chunking_strategies.py (entender divisão)
-3. Rodar rag_pipeline.py (entender RAG)
-4. GANHO: Agora consegues usar em Módulo 01 (agentes)!
-```
+Os três métodos concordam no top-1 (`CVE-2024-1234`), mas os scores do RRF ficam
+próximos entre os dois primeiros porque ambos aparecem bem ranqueados nos dois métodos.
 
----
+## Exercícios
 
-## ✅ Próximos Passos
+### Fácil
+1. **Mexa nas consultas do BM25**: em `embeddings_basics.py`, troque `query` e a
+   paráfrase (`paraphrase`) e observe o top-1 do BM25 e o ranking de cosseno. Compare
+   uma busca com termo específico ("buffer overflow") com uma paráfrase sem palavras em
+   comum. Em qual delas o embedding "ganha" do BM25?
+2. **Compare as estratégias de chunking**: rode `chunking_strategies.py` e olhe o nº de
+   chunks e o tamanho médio das três estratégias. Qual quebra no meio de uma frase? Troque
+   `SAMPLE_DOCUMENTS["security"]` por um texto seu em `utils/agentic_utils.py`... ou, sem
+   editar o módulo compartilhado, chame `utils.chunking_utils.test_chunking_strategies`
+   com o seu próprio texto num script separado.
+3. **Leia a base**: use `from utils.data_loader import get_cve_documents` e imprima
+   `get_cve_documents()`. Confirme que são três registros sintéticos e identifique qual
+   descrição contém "buffer overflow".
 
-- **Conceitos consolidados**? → Vá para **Módulo 03** (Observability)
-- **Quer fazer RAG de verdade**? → Vá para **Módulo 04** (Databases)
-- **Quer integrar com agentes**? → Volte para **Módulo 01** (LangGraph)
+### Médio
+4. **Semântico vs. palavra-chave**: em `embeddings_basics.py`, adicione uma consulta com
+   correspondência exata (ex.: `"CVE-2024-9012"`) e outra puramente conceitual (ex.:
+   `"weak random number generator"`). Como o ranking de BM25 difere do de cosseno em cada
+   caso?
+5. **Modelo de embedding**: `utils.semantic_embeddings.embed_texts` aceita o argumento
+   `model`. Rode um script seu chamando `embed_texts(textos, model="all-mpnet-base-v2")`
+   e compare com `all-MiniLM-L6-v2`. Qual é o compromisso entre qualidade e velocidade?
+6. **Entenda o RRF**: em `hybrid_search.py`, aumente `top_k` para 3 nos três motores e
+   observe como o score RRF (`1/(60+posição)`) ordena documentos que aparecem em apenas
+   um dos rankings.
 
+### Difícil
+7. **Banco vetorial de produção**: troque o motor semântico/híbrido por um banco vetorial
+   real (ChromaDB, Pinecone, Weaviate ou Qdrant), mantendo a mesma interface de busca.
+   O que muda nos imports e na inicialização? Confirme números e nomes de API na doc
+   oficial do produto antes de documentar.
+8. **Cache de embeddings**: embeddings são caros de recalcular. Projete uma camada que
+   persista os vetores de `embed_texts` em disco e os reutilize entre execuções para os
+   documentos já vistos.
+9. **Avaliação do retrieval**: para um conjunto de consultas com documentos "corretos"
+   conhecidos, meça **precisão** (os recuperados são relevantes?) e **revocação**
+   (deixou passar algum relevante?) de BM25, semântico e híbrido sobre os três registros.
+   Qual método vence em consultas exatas e qual vence em paráfrases?
+
+## Referências
+
+- Okapi BM25 — função de ranqueamento, fórmula e parâmetros `k1`/`b`:
+  [en.wikipedia.org/wiki/Okapi_BM25](https://en.wikipedia.org/wiki/Okapi_BM25)
+- Modelo de embedding `all-MiniLM-L6-v2` (384 dimensões, uso e limites):
+  [huggingface.co/sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- Guia de setup do provedor de LLM (Ollama, chaves): [../LLM_SETUP.md](../LLM_SETUP.md)
