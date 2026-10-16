@@ -38,7 +38,6 @@ def __getattr__(name):
         'Settings': ('config', 'Settings'),
         # Constants
         'COLLECTION_NAME_VULNERABILITIES': ('constants', 'COLLECTION_NAME_VULNERABILITIES'),
-        'DEFAULT_TOP_K': ('constants', 'DEFAULT_TOP_K'),
         'RRF_K': ('constants', 'RRF_K'),
         # Models
         'CVEData': ('models', 'CVEData'),
@@ -81,7 +80,6 @@ __all__ = [
     "Settings",
     # Constants
     "COLLECTION_NAME_VULNERABILITIES",
-    "DEFAULT_TOP_K",
     "RRF_K",
     # Models
     "CVEData",
@@ -90,6 +88,7 @@ __all__ = [
     # Logging
     "get_logger",
     "get_app_logger",
+    "setup_logging",
     # LLM
     "LLMClient",
     "get_llm_client",

@@ -132,8 +132,11 @@ class HybridSearch:
         bm25_ranks = {r.id: i + 1 for i, r in enumerate(bm25_results)}
         semantic_ranks = {r.id: i + 1 for i, r in enumerate(semantic_results)}
         
-        # Collect all unique document IDs
-        all_doc_ids = set(bm25_ranks.keys()) | set(semantic_ranks.keys())
+        # Collect all unique document IDs in a STABLE order: BM25 ranking first,
+        # then semantic-only hits. Iterating a set here broke exact RRF ties
+        # (common in a small corpus: ranks (1, 2) vs (2, 1) give the same score)
+        # in hash order, which changes between runs (PYTHONHASHSEED).
+        all_doc_ids = list(dict.fromkeys([*bm25_ranks, *semantic_ranks]))
         
         # Calculate RRF scores
         rrf_scores = {}

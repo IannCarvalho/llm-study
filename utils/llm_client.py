@@ -52,7 +52,7 @@ class LLMClient:
         
         self.model = model or config.ollama_model
         self.temperature = temperature if temperature is not None else config.llm_temperature
-        self.max_tokens = max_tokens or config.llm_max_tokens
+        self.max_tokens = max_tokens if max_tokens is not None else config.llm_max_tokens
         self.base_url = base_url or config.ollama_base_url
         self.api_key = api_key or config.openai_api_key
 
@@ -92,8 +92,10 @@ class LLMClient:
                 model=self.model,
                 base_url=self.base_url,
                 api_key=self.api_key,
-                temperature=temperature or self.temperature,
-                max_tokens=max_tokens or self.max_tokens,
+                # `is not None`, not `or`: 0.0 is a valid (deterministic) temperature
+                # and must reach the model instead of falling back to the default.
+                temperature=temperature if temperature is not None else self.temperature,
+                max_tokens=max_tokens if max_tokens is not None else self.max_tokens,
             )
         else:
             client = self._client
@@ -170,16 +172,21 @@ _client_instance: Optional[LLMClient] = None
 
 def get_llm_client(
     model: Optional[str] = None,
-    temperature: float = 0.7,
-    max_tokens: int = 512,
+    temperature: Optional[float] = None,
+    max_tokens: Optional[int] = None,
 ) -> LLMClient:
     """
     Get or create the global LLM client instance.
 
     Args:
-        model: Model name
-        temperature: Sampling temperature
-        max_tokens: Maximum response tokens
+        model: Model name (None -> OLLAMA_MODEL from the config / .env)
+        temperature: Sampling temperature (None -> LLM_TEMPERATURE)
+        max_tokens: Maximum response tokens (None -> LLM_MAX_TOKENS)
+
+    The instance is created on the FIRST call only. Arguments passed to later
+    calls cannot change it: they are ignored with a warning. For per-call
+    values use ``client.chat(..., temperature=...)``; for a differently
+    configured client build ``LLMClient(...)`` or call ``reset_llm_client()``.
 
     Returns:
         LLMClient instance
@@ -190,6 +197,19 @@ def get_llm_client(
         _client_instance = LLMClient(
             model=model, temperature=temperature, max_tokens=max_tokens
         )
+    else:
+        requested = {"model": model, "temperature": temperature, "max_tokens": max_tokens}
+        ignored = {
+            name: value
+            for name, value in requested.items()
+            if value is not None and value != getattr(_client_instance, name)
+        }
+        if ignored:
+            logger.warning(
+                "get_llm_client(): client already created; ignoring %s. Pass per-call "
+                "values to chat()/generate(), build LLMClient(...) or call reset_llm_client().",
+                ignored,
+            )
 
     return _client_instance
 
