@@ -33,7 +33,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 from utils.data_loader import get_cve_documents
-from utils.search import create_search_engine
+from utils.search import as_search_documents, create_search_engine
 
 
 def _build_documents() -> List[Dict]:
@@ -44,10 +44,7 @@ def _build_documents() -> List[Dict]:
     expect a list of ``{"id", "content", "metadata"}`` dicts. This is the
     long-term memory "store" the retriever searches over.
     """
-    return [
-        {"id": cve_id, "content": text, "metadata": {}}
-        for cve_id, text in get_cve_documents().items()
-    ]
+    return as_search_documents(get_cve_documents())
 
 
 class LongTermMemory:
@@ -143,7 +140,7 @@ class LongTermMemory:
             return None
 
 
-def _demo() -> None:
+def main() -> None:
     """
     Demonstrate long-term semantic recall.
 
@@ -182,4 +179,4 @@ def _demo() -> None:
 
 
 if __name__ == "__main__":
-    _demo()
+    main()

@@ -6,7 +6,7 @@ Loads JSON data files and caches them for performance.
 
 import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 from functools import lru_cache
 from utils.models import CVEData, SeverityLevel
 from utils.logging import get_logger

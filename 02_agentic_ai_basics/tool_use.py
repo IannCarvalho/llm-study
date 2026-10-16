@@ -76,5 +76,9 @@ def run_tool_use_agent(user_query: str) -> None:
     print(f"Analysis: {final_response}")
 
 
-if __name__ == "__main__":
+def main() -> None:
     run_tool_use_agent(QUERY)
+
+
+if __name__ == "__main__":
+    main()

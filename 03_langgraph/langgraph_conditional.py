@@ -97,13 +97,13 @@ def build_graph():
     return graph.compile()
 
 
-if __name__ == "__main__":
+def main() -> None:
     print("=" * 70)
     print("LangGraph: Conditional Routing")
     print("=" * 70)
-    
+
     app = build_graph()
-    
+
     # Test 1: CVE found
     print("\n--- Case 1: CVE Found ---")
     result1 = app.invoke({
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         "summary": ""
     })
     print(f"\nFinal: {result1['summary']}")
-    
+
     # Test 2: CVE not found
     print("\n\n--- Case 2: CVE Not Found ---")
     result2 = app.invoke({
@@ -121,3 +121,7 @@ if __name__ == "__main__":
         "summary": ""
     })
     print(f"\nFinal: {result2['summary']}")
+
+
+if __name__ == "__main__":
+    main()
