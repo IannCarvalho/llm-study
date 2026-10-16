@@ -2,6 +2,11 @@
 Centralized Logging Configuration
 
 Provides consistent logging across the entire application.
+
+Naming note: this module is ``utils.logging``. Inside it, ``import logging``
+still resolves to the standard library (absolute imports, and ``utils/`` is not
+on sys.path itself), so the clash is harmless at runtime -- import it as
+``from utils.logging import get_logger`` to keep the two apart when reading.
 """
 
 import logging

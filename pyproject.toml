@@ -38,14 +38,6 @@ select = ["E", "F", "W"]
 ignore = ["E501", "W291", "W293", "W292"]
 
 [tool.ruff.lint.per-file-ignores]
-# These existing modules carry a pre-existing unused-import (F401). They are not
-# part of this change and are intentionally left untouched, so F401 is silenced
-# for them specifically rather than disabled everywhere -- new code (including
-# tests/) is still checked for unused imports.
-"11_memory/memory_store.py" = ["F401"]
-"12_agentic_rag/agentic_rag.py" = ["F401"]
-"utils/data_loader.py" = ["F401"]
-"utils/search.py" = ["F401"]
 # The deterministic tests must call conftest.load_module() to register a
 # digit-prefixed module (e.g. 12_agentic_rag) BEFORE a `from utils...` import
 # that depends on that setup, so a module-level import deliberately follows a
