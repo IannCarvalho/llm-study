@@ -6,14 +6,15 @@ screened first. These checks are deterministic (pure regex / string logic), so
 they are instant, reproducible, and run with no LLM backend at all — exactly the
 property you want for a security control that must never silently fail open.
 
-Two threats are covered here, mapped to the OWASP Top 10 for LLM Applications:
+Two threats are covered here, mapped to the OWASP Top 10 for LLM Applications
+(2025 edition):
 
-- Prompt injection (LLM01): untrusted text that tries to override the system
+- Prompt injection (LLM01:2025): untrusted text that tries to override the system
   prompt — "ignore previous instructions", "you are now DAN", "reveal your
   system prompt", fake role markers, etc. The attack is dangerous precisely
   because RAG feeds *external* documents (here: CVE descriptions) straight into
   the prompt. A poisoned document is injection with extra steps.
-- Sensitive-data exposure (LLM02 / LLM06): PII and secrets — emails and
+- Sensitive information disclosure (LLM02:2025): PII and secrets — emails and
   API-key-shaped tokens — that should be redacted before they are embedded,
   logged, or sent to a third-party model.
 
