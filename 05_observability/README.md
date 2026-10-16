@@ -236,9 +236,8 @@ Results sent to Langfuse (see the experiment in your project).
 ```
 
 O stderr mostra que os run-evaluators tentaram enviar um score `None` e o Langfuse recusou
-(`CreateScoreRequest` exige número): consequência direta de rodar sem LLM. Com o modelo ligado,
-cada pergunta é respondida, os evaluators pontuam accuracy/tamanho e o `result.format()` imprime
-a tabela de scores.
+(`CreateScoreRequest` exige número): consequência direta de rodar sem LLM. Com o modelo ligado, cada pergunta é respondida, os evaluators são aplicados a cada resposta e o
+`result.format()` imprime a tabela de scores.
 
 ## Exercícios
 
@@ -248,7 +247,9 @@ a tabela de scores.
    consequência de ter tracing ligado mas o LLM indisponível?
 2. **Adicione um evaluator ao Langfuse.** Escreva um novo evaluator de item em `langfuse_demo.py`
    (ex.: `evaluate_mentions_cve` que dá 1.0 se a resposta cita um identificador `CVE-`) e some-o
-   à lista `evaluators=[...]` de `run_experiment`. Rode com o Ollama ligado e veja o novo score
+   à lista `evaluators=[...]` de `run_experiment`. O SDK chama cada evaluator de item com
+   argumentos nomeados, então use a assinatura `def evaluate_mentions_cve(*, input, output,
+   expected_output=None, metadata=None, **kwargs)`. Rode com o Ollama ligado e veja o novo score
    na tabela de `result.format()`.
 3. **Explique o resultado vazio.** A partir do código de `evaluate_average_accuracy`, explique
    por que, sem LLM, o experimento imprime `No experiment results to display` e os
