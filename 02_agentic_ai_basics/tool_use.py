@@ -9,10 +9,11 @@ Compare with react_pattern.py: same tool, but here decision is direct.
 
 import json
 import re
-from utils.llm_client import get_llm_client
-from utils.tools import TOOL_REGISTRY
-from utils.prompts import TOOL_USE_SYSTEM
+
 from utils.agentic_utils import QUERY
+from utils.llm_client import get_llm_client
+from utils.prompts import TOOL_USE_SYSTEM
+from utils.tools import TOOL_REGISTRY
 
 
 def extract_tool_call(text: str) -> dict:

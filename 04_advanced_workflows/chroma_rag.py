@@ -11,10 +11,10 @@ Now using centralized abstractions and configuration.
 """
 
 from utils.agentic_utils import QUERY
-from utils.rag_pipeline import ChromaRAGPipeline
-from utils.prompts import RAG_SYSTEM
 from utils.data_loader import load_cves
 from utils.logging import get_logger
+from utils.prompts import RAG_SYSTEM
+from utils.rag_pipeline import ChromaRAGPipeline
 
 logger = get_logger(__name__)
 

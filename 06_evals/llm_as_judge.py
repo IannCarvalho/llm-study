@@ -25,14 +25,13 @@ another configured backend) to be running; it fails with a clear message if not.
 
 import json
 import re
-from typing import Dict, List, Optional
 
-from utils.llm_client import get_llm_client
 from utils.data_loader import load_cves
+from utils.llm_client import get_llm_client
 from utils.models import CVEData
 
 
-def format_cve_context(cves: List[CVEData]) -> str:
+def format_cve_context(cves: list[CVEData]) -> str:
     """Render the source CVEs as plain-text context for both the writer and judge."""
     blocks = []
     for cve in cves:
@@ -77,7 +76,7 @@ def build_judge_prompt(context: str, summary: str) -> str:
     )
 
 
-def parse_judge_json(raw: str) -> Optional[Dict]:
+def parse_judge_json(raw: str) -> dict | None:
     """
     Extract the JSON verdict from the judge's reply.
 
@@ -98,7 +97,7 @@ def parse_judge_json(raw: str) -> Optional[Dict]:
     return None
 
 
-def print_verdict(verdict: Dict) -> None:
+def print_verdict(verdict: dict) -> None:
     """Pretty-print the judge's scores."""
     criteria = ["groundedness", "completeness", "clarity"]
     print("\nJudge verdict:")
@@ -107,7 +106,7 @@ def print_verdict(verdict: Dict) -> None:
         entry = verdict.get(criterion, {})
         score = entry.get("score", "?")
         justification = entry.get("justification", "")
-        if isinstance(score, (int, float)):
+        if isinstance(score, int | float):
             scores.append(float(score))
         print(f"  {criterion:13s}: {score}/5 — {justification}")
     if scores:

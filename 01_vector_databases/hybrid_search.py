@@ -12,9 +12,9 @@ high in either method, creating a balanced final ranking.
 Now using the refactored search engine architecture with unified interface.
 """
 
-from utils.search import BM25Search, SemanticSearch, HybridSearch
 from utils.data_loader import get_cve_documents
 from utils.logging import get_logger
+from utils.search import BM25Search, HybridSearch, SemanticSearch
 
 logger = get_logger(__name__)
 

@@ -12,18 +12,18 @@ Available models:
     - all-mpnet-base-v2 (large, 768-dim, best quality)
     - paraphrase-MiniLM-L6-v2 (good for paraphrases)
 """
-from sentence_transformers import SentenceTransformer
-from typing import List
-import numpy as np
-from utils.config import get_config
 
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+from utils.config import get_config
 
 # Cache model to avoid reloading
 _model = None
 _current_model_name = None
 
 
-def embed_texts(texts: List[str], model: str = "all-MiniLM-L6-v2") -> np.ndarray:
+def embed_texts(texts: list[str], model: str = "all-MiniLM-L6-v2") -> np.ndarray:
     """
     Embed multiple texts.
     

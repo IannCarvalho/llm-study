@@ -4,10 +4,10 @@ Pydantic Models - Type-safe data schemas
 Centralized data structures for validation and serialization.
 """
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-from typing import Optional, List, Dict, Any
 from enum import Enum
+from typing import Any
 
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # ============================================================================
 # ENUMS
@@ -40,9 +40,9 @@ class CVEMetadata(BaseModel):
     cve_id: str
     severity: SeverityLevel
     cvss_score: float = Field(ge=0.0, le=10.0)
-    affected_versions: List[str] = []
-    cvss_vector: Optional[str] = None
-    published_date: Optional[str] = None
+    affected_versions: list[str] = []
+    cvss_vector: str | None = None
+    published_date: str | None = None
     vulnerability_type: VulnerabilityType = VulnerabilityType.OTHER
 
     model_config = ConfigDict(use_enum_values=False)
@@ -54,9 +54,9 @@ class CVEData(BaseModel):
     severity: SeverityLevel
     score: float = Field(ge=0.0, le=10.0)
     description: str
-    affected_versions: List[str] = []
+    affected_versions: list[str] = []
     cvss_vector: str
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
     model_config = ConfigDict(use_enum_values=False)
 
@@ -76,8 +76,8 @@ class CVEData(BaseModel):
 class VulnerabilityMetadata(BaseModel):
     severity: SeverityLevel
     type: VulnerabilityType
-    cve_id: Optional[str] = None
-    tags: List[str] = []
+    cve_id: str | None = None
+    tags: list[str] = []
 
     model_config = ConfigDict(use_enum_values=False)
 
@@ -94,8 +94,8 @@ class Vulnerability(BaseModel):
 class Document(BaseModel):
     id: str
     content: str
-    metadata: Dict[str, Any] = {}
-    source: Optional[str] = None
+    metadata: dict[str, Any] = {}
+    source: str | None = None
 
 
 # ============================================================================
@@ -107,19 +107,19 @@ class SearchResult(BaseModel):
     id: str
     content: str
     score: float = Field(ge=0.0, le=1.0)
-    metadata: Dict[str, Any] = {}
-    source: Optional[str] = None
-    retrieval_method: Optional[str] = None  # "bm25", "semantic", "hybrid"
+    metadata: dict[str, Any] = {}
+    source: str | None = None
+    retrieval_method: str | None = None  # "bm25", "semantic", "hybrid"
 
 
 class SearchResults(BaseModel):
     """Aggregated search results with timing and metadata."""
     query: str
-    results: List[SearchResult]
+    results: list[SearchResult]
     total_results: int
     search_method: str
     elapsed_time: float = 0.0  # seconds
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class RankingResult(BaseModel):
@@ -138,9 +138,9 @@ class RankingResult(BaseModel):
 class RAGContext(BaseModel):
     """Query context for RAG generation, including retrieved documents."""
     query: str
-    retrieved_documents: List[Document]
+    retrieved_documents: list[Document]
     context_text: str
-    source_indices: List[int] = []
+    source_indices: list[int] = []
 
 
 class RAGResponse(BaseModel):
@@ -148,7 +148,7 @@ class RAGResponse(BaseModel):
     query: str
     context: str
     response: str
-    retrieved_documents: List[SearchResult]
+    retrieved_documents: list[SearchResult]
     model: str
     elapsed_time: float = 0.0
 
@@ -183,8 +183,8 @@ class ConversationTurn(BaseModel):
     """One interaction in an agent conversation."""
     user_message: str
     assistant_message: str
-    tools_used: List[ToolCall] = []
-    metadata: Dict[str, Any] = {}
+    tools_used: list[ToolCall] = []
+    metadata: dict[str, Any] = {}
 
 
 # ============================================================================
@@ -194,15 +194,15 @@ class ConversationTurn(BaseModel):
 class EmbeddingResult(BaseModel):
     """Result from embedding operation."""
     text: str
-    embedding: List[float]
+    embedding: list[float]
     model: str
     dimension: int
 
 
 class BatchEmbeddingResult(BaseModel):
     """Results from batch embedding operation."""
-    texts: List[str]
-    embeddings: List[List[float]]
+    texts: list[str]
+    embeddings: list[list[float]]
     model: str
     dimension: int
     total_texts: int
@@ -217,8 +217,8 @@ class LLMResponse(BaseModel):
     """Response from LLM."""
     content: str
     model: str
-    tokens_used: Optional[int] = None
-    finish_reason: Optional[str] = None
+    tokens_used: int | None = None
+    finish_reason: str | None = None
 
 
 class StreamChunk(BaseModel):

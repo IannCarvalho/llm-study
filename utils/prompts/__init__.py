@@ -6,7 +6,6 @@ Prompts are loaded on demand to keep memory footprint low.
 """
 
 from pathlib import Path
-from typing import Dict
 
 _PROMPT_DIR = Path(__file__).parent
 
@@ -14,7 +13,7 @@ _PROMPT_DIR = Path(__file__).parent
 class PromptTemplates:
     """Load and manage system prompts for agentic patterns."""
 
-    _cache: Dict[str, str] = {}
+    _cache: dict[str, str] = {}
 
     @staticmethod
     def _load_prompt(name: str) -> str:
@@ -26,7 +25,7 @@ class PromptTemplates:
         if not prompt_file.exists():
             raise FileNotFoundError(f"Prompt file not found: {prompt_file}")
 
-        with open(prompt_file, "r") as f:
+        with open(prompt_file) as f:
             content = f.read().strip()
 
         PromptTemplates._cache[name] = content

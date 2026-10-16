@@ -14,10 +14,12 @@ Compare with basics: linear pipeline vs graph with branches.
 """
 
 from typing import TypedDict
-from langgraph.graph import StateGraph, END
+
+from langgraph.graph import END, StateGraph
+
+from utils.agentic_utils import CVE_ID
 from utils.llm_client import get_llm_client
 from utils.tools import TOOL_REGISTRY
-from utils.agentic_utils import CVE_ID
 
 
 class CVEState(TypedDict):

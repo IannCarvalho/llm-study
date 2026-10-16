@@ -13,18 +13,18 @@ import logging
 import logging.handlers
 import sys
 from pathlib import Path
-from typing import Optional
+
 from utils.config import get_config
 from utils.constants import LOG_DIR, LOG_FORMAT
 
 # Global logger instance
-_logger: Optional[logging.Logger] = None
+_logger: logging.Logger | None = None
 
 
 def setup_logging(
     name: str = "qubika",
-    level: Optional[str] = None,
-    log_file: Optional[str] = None,
+    level: str | None = None,
+    log_file: str | None = None,
 ) -> logging.Logger:
     """
     Set up logging with console and optional file handlers.
@@ -85,7 +85,7 @@ def get_logger(name: str) -> logging.Logger:
     return setup_logging(name)
 
 
-def configure_app_logging(level: Optional[str] = None) -> logging.Logger:
+def configure_app_logging(level: str | None = None) -> logging.Logger:
     """
     Configure main application logger.
     
@@ -111,7 +111,7 @@ def get_app_logger() -> logging.Logger:
 
 # Convenience decorators
 
-def log_execution(logger: Optional[logging.Logger] = None):
+def log_execution(logger: logging.Logger | None = None):
     """
     Decorator to log function execution with timing.
     
