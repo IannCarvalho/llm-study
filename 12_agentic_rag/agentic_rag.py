@@ -33,9 +33,9 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
+from typing import Dict, List
 
-from utils.search import create_search_engine
+from utils.search import as_search_documents, create_search_engine
 from utils.data_loader import get_cve_documents, load_cves
 from utils.logging import get_logger
 
@@ -61,10 +61,7 @@ TOP_K = 3
 # ---------------------------------------------------------------------------
 def build_documents() -> List[Dict]:
     """Adapt get_cve_documents() {id: text} into the retriever's doc shape."""
-    return [
-        {"id": cve_id, "content": text, "metadata": {}}
-        for cve_id, text in get_cve_documents().items()
-    ]
+    return as_search_documents(get_cve_documents())
 
 
 # ---------------------------------------------------------------------------

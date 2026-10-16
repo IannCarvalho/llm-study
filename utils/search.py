@@ -1,21 +1,30 @@
 """Unified Search - BM25, Semantic, and Hybrid Search"""
 
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Union
 import numpy as np
-import re
 from rank_bm25 import BM25Okapi
 from utils.semantic_embeddings import embed_text, embed_texts
 from utils.models import SearchResult
 from utils.constants import RRF_K, MIN_SEMANTIC_SIMILARITY
 from utils.logging import get_logger
+from utils.text import tokenize
 from sentence_transformers import util
 
 logger = get_logger(__name__)
 
 
-def tokenize(text: str) -> List[str]:
-    """Tokenize text into lowercase word tokens."""
-    return re.findall(r"\w+", text.lower())
+def as_search_documents(documents: Dict[str, str]) -> List[Dict]:
+    """
+    Adapt ``{id: text}`` (what get_cve_documents returns) into the engines' shape.
+
+    The engines expect ``[{"id", "content", "metadata"}]``: passing the dict from
+    get_cve_documents() straight in is the classic gotcha (wrong shape, no
+    "content" key).
+    """
+    return [
+        {"id": doc_id, "content": text, "metadata": {}}
+        for doc_id, text in documents.items()
+    ]
 
 
 class BM25Search:

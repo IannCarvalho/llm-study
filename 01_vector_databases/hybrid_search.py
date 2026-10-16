@@ -13,7 +13,7 @@ Now using the refactored search engine architecture with unified interface.
 """
 
 from utils.search import BM25Search, SemanticSearch, HybridSearch
-from utils.agentic_utils import get_cve_documents
+from utils.data_loader import get_cve_documents
 from utils.logging import get_logger
 
 logger = get_logger(__name__)
