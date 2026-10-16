@@ -94,9 +94,14 @@ winget install rtk-ai.rtk   # Windows
 
 O README oficial pede para **conferir se o pacote instalado é o certo** (existe
 outro "rtk" no crates.io): rode `rtk --version` e `rtk gain` (tem que mostrar o
-painel de economia, não "command not found"). Licença: Apache-2.0 (CLI) + BUSL-1.1
-(engine/proxy). Alegações de 60-90% de redução e `<10ms` de overhead são **do
-fornecedor** (README do RTK), medidas sobre a saída de bash — não sobre a conta.
+painel de economia, não "command not found"). Para ligar ao agente, `rtk init -g`
+instala um hook (no Claude Code, um PreToolUse) que reescreve os comandos de
+shell; segundo o README, o hook **só age em chamadas de shell** (as ferramentas
+nativas de leitura/busca do agente não passam por ele). Licenças, por edição: a
+`rtk` combina Apache-2.0 e BUSL-1.1 (o engine de compressão), a `rtk-oss` é só
+Apache-2.0 e o `rtk-proxy` é BUSL-1.1. Alegações de 60-90% de redução e `<10ms`
+de overhead são **do fornecedor** (README do RTK), medidas sobre a saída de
+bash, não sobre a conta.
 
 ## Como plugar no módulo 13 (sem editar o 13)
 O [`13_deployment`](../13_deployment/README.md) expõe o pipeline como API
