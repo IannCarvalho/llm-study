@@ -24,8 +24,8 @@ Run the self-test (no LLM required):
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, List, Optional
 
 
 # A turn is one message in the conversation. role is "user" | "assistant" |
@@ -45,12 +45,12 @@ class Turn:
 # summarization from re-wrapping its own header on every eviction. The LLM-backed
 # summarizer and the deterministic fallback share this signature, so the memory
 # class never cares which one it was given.
-Summarizer = Callable[[List["Turn"], Optional[str]], str]
+Summarizer = Callable[[list["Turn"], str | None], str]
 
 _SUMMARY_HEADER = "Earlier conversation (summarized):"
 
 
-def _deterministic_summary(turns: List[Turn], prior_summary: Optional[str] = None) -> str:
+def _deterministic_summary(turns: list[Turn], prior_summary: str | None = None) -> str:
     """
     LLM-free fallback summarizer.
 
@@ -60,7 +60,7 @@ def _deterministic_summary(turns: List[Turn], prior_summary: Optional[str] = Non
     instant, dependency-free, and good enough to keep the conversation's gist when
     no LLM is available — and it makes this module testable without Ollama.
     """
-    lines: List[str] = []
+    lines: list[str] = []
 
     # Carry the prior summary's existing bullet lines forward unchanged so the
     # oldest content is not re-truncated (and the header is not nested) on each
@@ -81,7 +81,7 @@ def _deterministic_summary(turns: List[Turn], prior_summary: Optional[str] = Non
     return _SUMMARY_HEADER + "\n" + "\n".join(lines)
 
 
-def _llm_summary(turns: List[Turn], prior_summary: Optional[str] = None) -> str:
+def _llm_summary(turns: list[Turn], prior_summary: str | None = None) -> str:
     """
     LLM-backed summarizer using the project's central client.
 
@@ -133,16 +133,16 @@ class ConversationMemory:
     def __init__(
         self,
         window_size: int = 4,
-        summarizer: Optional[Summarizer] = None,
+        summarizer: Summarizer | None = None,
     ) -> None:
         if window_size < 1:
             raise ValueError("window_size must be >= 1")
 
         self.window_size = window_size
         self._summarizer: Summarizer = summarizer or _llm_summary
-        self._turns: List[Turn] = []
+        self._turns: list[Turn] = []
         # The running summary of everything that has fallen out of the window.
-        self._summary: Optional[str] = None
+        self._summary: str | None = None
 
     def add_turn(self, role: str, content: str) -> None:
         """Append a turn and summarize-then-evict anything beyond the window."""
@@ -175,7 +175,7 @@ class ConversationMemory:
         # the compression is cumulative rather than losing older context.
         self._summary = self._summarizer(evicted, self._summary)
 
-    def get_messages(self) -> List[dict]:
+    def get_messages(self) -> list[dict]:
         """
         Build the message list to send to the LLM: the running summary (as a
         system message) followed by the verbatim windowed turns.
@@ -183,19 +183,19 @@ class ConversationMemory:
         Shaped as ``{"role": ..., "content": ...}`` dicts to match
         ``LLMClient.chat`` directly.
         """
-        messages: List[dict] = []
+        messages: list[dict] = []
         if self._summary:
             messages.append({"role": "system", "content": self._summary})
         messages.extend({"role": t.role, "content": t.content} for t in self._turns)
         return messages
 
     @property
-    def summary(self) -> Optional[str]:
+    def summary(self) -> str | None:
         """The current running summary of evicted turns (None if nothing evicted)."""
         return self._summary
 
     @property
-    def window(self) -> List[Turn]:
+    def window(self) -> list[Turn]:
         """A copy of the turns currently held verbatim in the window."""
         return list(self._turns)
 

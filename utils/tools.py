@@ -6,6 +6,7 @@ reuses the same implementation instead of redefining it.
 """
 
 from langchain_core.tools import tool
+
 from utils.data_loader import get_cve_by_id
 
 

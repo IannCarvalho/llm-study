@@ -24,16 +24,16 @@ Como rodar (ver README.md da pasta):
     python -m 13_deployment.serve
 """
 
-from typing import AsyncIterator, List, Optional
+from collections.abc import AsyncIterator
 
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
 from utils.data_loader import get_cve_documents
-from utils.search import create_search_engine
-from utils.models import SearchResult
 from utils.logging import get_logger
+from utils.models import SearchResult
+from utils.search import create_search_engine
 
 logger = get_logger(__name__)
 
@@ -62,14 +62,14 @@ class QueryResponse(BaseModel):
     query: str
     answer: str
     used_llm: bool
-    sources: List[str]
+    sources: list[str]
 
 
 # ---------------------------------------------------------------------------
 # Camada de recuperação (determinística, sem LLM)
 # ---------------------------------------------------------------------------
 
-def _load_documents() -> List[dict]:
+def _load_documents() -> list[dict]:
     """Carrega os CVEs como lista de documentos no formato que o search espera.
 
     get_cve_documents() devolve {id: texto}; o motor de busca espera
@@ -79,14 +79,14 @@ def _load_documents() -> List[dict]:
     return [{"id": cid, "content": text, "metadata": {}} for cid, text in docs.items()]
 
 
-def _retrieve(query: str, top_k: int = 3) -> List[SearchResult]:
+def _retrieve(query: str, top_k: int = 3) -> list[SearchResult]:
     """Roda a busca híbrida (BM25 + semântica). Determinístico, sem LLM."""
     documents = _load_documents()
     engine = create_search_engine(method="hybrid")
     return engine.search(query, documents, top_k=top_k)
 
 
-def _format_context(results: List[SearchResult]) -> str:
+def _format_context(results: list[SearchResult]) -> str:
     """Monta um bloco de contexto textual a partir dos resultados de busca."""
     if not results:
         return "Nenhum CVE relevante encontrado."
@@ -100,7 +100,7 @@ def _format_context(results: List[SearchResult]) -> str:
 # Geração — LLM com import LAZY e fallback determinístico
 # ---------------------------------------------------------------------------
 
-def _try_generate_with_llm(query: str, context: str) -> Optional[str]:
+def _try_generate_with_llm(query: str, context: str) -> str | None:
     """Tenta gerar uma resposta com o LLM. Devolve None se não for possível.
 
     O import de utils.llm_client (que no topo importa langchain_openai) é feito
@@ -158,7 +158,7 @@ def _sse_pack(data: str) -> str:
     return "".join(f"data: {line}\n" for line in lines) + "\n"
 
 
-def _chunk_text(text: str, size: int = 40) -> List[str]:
+def _chunk_text(text: str, size: int = 40) -> list[str]:
     """Quebra um texto em pedaços de tamanho fixo pra simular tokens no stream."""
     return [text[i : i + size] for i in range(0, len(text), size)] or [""]
 

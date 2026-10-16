@@ -10,11 +10,12 @@ Setup:
 """
 
 from pinecone import Pinecone
+
+from utils.agentic_utils import QUERY
 from utils.config import get_config
+from utils.data_loader import load_cves
 from utils.llm_client import get_llm_client
 from utils.prompts import RAG_SYSTEM
-from utils.data_loader import load_cves
-from utils.agentic_utils import QUERY
 from utils.semantic_embeddings import embed_text, embed_texts
 
 

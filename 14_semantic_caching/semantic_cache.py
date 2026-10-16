@@ -18,7 +18,6 @@ nenhum LLM; a "resposta" cacheada e so uma string de demonstracao.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -76,7 +75,7 @@ class SemanticCache:
             raise ValueError("threshold deve estar entre 0.0 e 1.0")
         self.threshold = threshold
         self.model = model
-        self._entries: List[CacheEntry] = []
+        self._entries: list[CacheEntry] = []
         self.stats = CacheStats()
 
     def __len__(self) -> int:
@@ -87,12 +86,12 @@ class SemanticCache:
         emb = embed_text(query, model=self.model)
         self._entries.append(CacheEntry(query=query, embedding=emb, response=response))
 
-    def _nearest(self, query: str) -> Tuple[Optional[CacheEntry], float]:
+    def _nearest(self, query: str) -> tuple[CacheEntry | None, float]:
         """Retorna a entrada mais similar a query e a similaridade dela."""
         if not self._entries:
             return None, 0.0
         q_emb = embed_text(query, model=self.model)
-        best_entry: Optional[CacheEntry] = None
+        best_entry: CacheEntry | None = None
         best_sim = -1.0
         for entry in self._entries:
             sim = _cosine_similarity(q_emb, entry.embedding)
@@ -101,7 +100,7 @@ class SemanticCache:
                 best_entry = entry
         return best_entry, best_sim
 
-    def get(self, query: str) -> Optional[str]:
+    def get(self, query: str) -> str | None:
         """
         Procura a query no cache por similaridade.
 
@@ -115,7 +114,7 @@ class SemanticCache:
         self.stats.misses += 1
         return None
 
-    def lookup(self, query: str) -> Tuple[Optional[str], float]:
+    def lookup(self, query: str) -> tuple[str | None, float]:
         """
         Como get(), mas tambem devolve a similaridade do melhor candidato.
         Util para demos/debug. NAO atualiza metricas (nao conta hit/miss).

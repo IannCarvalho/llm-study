@@ -5,11 +5,11 @@ Loads JSON data files and caches them for performance.
 """
 
 import json
-from pathlib import Path
-from typing import List, Dict, Optional
 from functools import lru_cache
-from utils.models import CVEData, SeverityLevel
+from pathlib import Path
+
 from utils.logging import get_logger
+from utils.models import CVEData, SeverityLevel
 
 logger = get_logger(__name__)
 
@@ -17,7 +17,7 @@ DATA_DIR = Path(__file__).parent / "data"
 
 
 @lru_cache(maxsize=1)
-def load_cves() -> List[CVEData]:
+def load_cves() -> list[CVEData]:
     """
     Load CVE data from JSON file.
     
@@ -31,7 +31,7 @@ def load_cves() -> List[CVEData]:
         return []
     
     try:
-        with open(cve_file, 'r') as f:
+        with open(cve_file) as f:
             data = json.load(f)
         
         cves = [
@@ -54,7 +54,7 @@ def load_cves() -> List[CVEData]:
         return []
 
 
-def get_cve_by_id(cve_id: str) -> Optional[CVEData]:
+def get_cve_by_id(cve_id: str) -> CVEData | None:
     """
     Get a single CVE by ID.
     
@@ -68,7 +68,7 @@ def get_cve_by_id(cve_id: str) -> Optional[CVEData]:
     return next((cve for cve in cves if cve.id == cve_id), None)
 
 
-def search_cves(query: str) -> List[CVEData]:
+def search_cves(query: str) -> list[CVEData]:
     """
     Search CVEs by query string (substring matching).
     
@@ -93,7 +93,7 @@ def search_cves(query: str) -> List[CVEData]:
 # The block is chosen by the record's typed `vulnerability_type` (cves.json),
 # never by substrings of the description: a substring test for "rce" also
 # matches "source" and "force", which gave the crypto CVE the RCE keywords.
-_KEYWORDS_BY_TYPE: Dict[str, str] = {
+_KEYWORDS_BY_TYPE: dict[str, str] = {
     "sql_injection": (
         "SQL injection SQL injection SQL injection database attack "
         "SQL query injection SQL injection vulnerability "
@@ -123,7 +123,7 @@ _KEYWORDS_BY_TYPE: Dict[str, str] = {
 }
 
 
-def get_cve_documents(enrich_keywords: bool = True) -> Dict[str, str]:
+def get_cve_documents(enrich_keywords: bool = True) -> dict[str, str]:
     """
     Get CVEs formatted as documents for vector database indexing.
 
@@ -163,7 +163,7 @@ def reset_cache():
     logger.info("Data loading cache cleared")
 
 
-def load_cves_from(path: str | Path) -> List[CVEData]:
+def load_cves_from(path: str | Path) -> list[CVEData]:
     """
     Load CVE data from an arbitrary JSON file (opt-in alternative dataset).
 
@@ -188,7 +188,7 @@ def load_cves_from(path: str | Path) -> List[CVEData]:
         return []
 
     try:
-        with open(cve_file, 'r') as f:
+        with open(cve_file) as f:
             data = json.load(f)
 
         cves = [

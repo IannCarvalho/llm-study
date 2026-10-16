@@ -30,13 +30,11 @@ Run it (retrieval runs without Ollama; generation is skipped if no LLM):
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-
 from utils.data_loader import get_cve_documents
 from utils.search import as_search_documents, create_search_engine
 
 
-def _build_documents() -> List[Dict]:
+def _build_documents() -> list[dict]:
     """
     Adapt the CVE knowledge base into the retriever's document shape.
 
@@ -87,7 +85,7 @@ class LongTermMemory:
             self.method = "bm25"
             return create_search_engine("bm25")
 
-    def recall(self, query: str) -> List[Dict]:
+    def recall(self, query: str) -> list[dict]:
         """
         Retrieve the most relevant memories for a query.
 
@@ -112,7 +110,7 @@ class LongTermMemory:
                   for m in memories]
         return "\n\n".join(blocks)
 
-    def answer(self, query: str) -> Optional[str]:
+    def answer(self, query: str) -> str | None:
         """
         Full long-term-memory loop: recall context, then generate a grounded
         answer with the central LLM client.

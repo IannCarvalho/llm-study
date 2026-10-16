@@ -8,7 +8,6 @@ Provides unified interface for text chunking with multiple strategies:
 """
 
 import re
-from typing import List
 
 
 def chunk_text(
@@ -16,7 +15,7 @@ def chunk_text(
     strategy: str = 'recursive',
     chunk_size: int = 500,
     overlap: int = 50
-) -> List[str]:
+) -> list[str]:
     """
     Unified interface for text chunking.
     
@@ -59,7 +58,7 @@ def _fixed_size_chunking(
     text: str,
     chunk_size: int = 500,
     overlap: int = 50
-) -> List[str]:
+) -> list[str]:
     """
     Simple fixed-size chunking.
     
@@ -84,7 +83,7 @@ def _sentence_chunking(
     text: str,
     chunk_size: int = 500,
     overlap: int = 50
-) -> List[str]:
+) -> list[str]:
     """
     Sentence-aware chunking.
     
@@ -126,7 +125,7 @@ def _recursive_chunking(
     text: str,
     chunk_size: int = 500,
     overlap: int = 50
-) -> List[str]:
+) -> list[str]:
     """
     Recursive hierarchical chunking (RECOMMENDED).
     
@@ -142,11 +141,11 @@ def _recursive_chunking(
     
     def _split_and_chunk(
         text: str,
-        separators: List[str],
+        separators: list[str],
         chunk_size: int,
         overlap: int,
         depth: int = 0
-    ) -> List[str]:
+    ) -> list[str]:
         """Recursively split text using progressively smaller separators."""
         if depth >= len(separators):
             # Fall back to simple fixed-size if no separators left
@@ -205,7 +204,7 @@ def _recursive_chunking(
 
 def test_chunking_strategies(
     text: str,
-    strategies: List[str] = None,
+    strategies: list[str] = None,
     chunk_sizes: dict = None
 ) -> dict:
     """

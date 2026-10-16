@@ -11,7 +11,6 @@ Single place where the project reads its configuration:
 """
 
 import logging
-from typing import Optional
 
 from dotenv import load_dotenv
 from pydantic import Field
@@ -40,13 +39,13 @@ class Settings(BaseSettings):
     llm_temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     llm_max_tokens: int = Field(default=512, ge=1, le=4096)
     chroma_path: str = Field(default="./data/chroma")
-    pinecone_api_key: Optional[str] = Field(default=None)
-    hf_token: Optional[str] = Field(default=None)
+    pinecone_api_key: str | None = Field(default=None)
+    hf_token: str | None = Field(default=None)
     debug: bool = Field(default=False)
     log_level: str = Field(default="INFO")
 
 
-_settings: Optional[Settings] = None
+_settings: Settings | None = None
 
 
 def get_settings() -> Settings:

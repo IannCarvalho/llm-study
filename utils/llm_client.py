@@ -16,9 +16,10 @@ Usage:
     print(response)
 """
 
-from typing import Optional
+
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+
 from utils.config import get_config
 from utils.logging import get_logger
 
@@ -30,11 +31,11 @@ class LLMClient:
 
     def __init__(
         self,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        base_url: str | None = None,
+        api_key: str | None = None,
     ):
         """
         Initialize LLM client.
@@ -68,9 +69,9 @@ class LLMClient:
     def chat(
         self,
         messages: list[dict],
-        system_prompt: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
+        system_prompt: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> str:
         """
         Send chat messages and get a response.
@@ -125,9 +126,9 @@ class LLMClient:
     def generate(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
+        system_prompt: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> str:
         """
         Generate text from a simple prompt (no conversation history).
@@ -165,13 +166,13 @@ class LLMClient:
 
 
 # Singleton instance
-_client_instance: Optional[LLMClient] = None
+_client_instance: LLMClient | None = None
 
 
 def get_llm_client(
-    model: Optional[str] = None,
-    temperature: Optional[float] = None,
-    max_tokens: Optional[int] = None,
+    model: str | None = None,
+    temperature: float | None = None,
+    max_tokens: int | None = None,
 ) -> LLMClient:
     """
     Get or create the global LLM client instance.

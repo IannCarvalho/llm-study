@@ -25,11 +25,9 @@ blocked and sanitized before it would ever reach `get_llm_client().generate(...)
 
 import re
 from dataclasses import dataclass, field
-from typing import List
 
 from utils.data_loader import load_cves
 from utils.models import CVEData, SeverityLevel
-
 
 # ---------------------------------------------------------------------------
 # Detection patterns
@@ -71,12 +69,12 @@ _SECRET_RES = [
 class GuardResult:
     """Outcome of screening one piece of input text."""
     is_safe: bool
-    injection_hits: List[str] = field(default_factory=list)   # labels of injection patterns matched
-    pii_hits: List[str] = field(default_factory=list)         # kinds of PII/secret matched
+    injection_hits: list[str] = field(default_factory=list)   # labels of injection patterns matched
+    pii_hits: list[str] = field(default_factory=list)         # kinds of PII/secret matched
     sanitized_text: str = ""                                  # text with PII/secrets redacted
 
     @property
-    def reasons(self) -> List[str]:
+    def reasons(self) -> list[str]:
         """Human-readable list of why the input was flagged (empty if safe)."""
         out = [f"prompt_injection:{h}" for h in self.injection_hits]
         out += [f"sensitive_data:{h}" for h in self.pii_hits]
@@ -86,7 +84,7 @@ class GuardResult:
 # ---------------------------------------------------------------------------
 # Core checks
 # ---------------------------------------------------------------------------
-def detect_injection(text: str) -> List[str]:
+def detect_injection(text: str) -> list[str]:
     """
     Return the labels of every prompt-injection pattern that matches `text`.
 
@@ -96,9 +94,9 @@ def detect_injection(text: str) -> List[str]:
     return [label for label, pattern in _INJECTION_PATTERNS if pattern.search(text)]
 
 
-def detect_pii(text: str) -> List[str]:
+def detect_pii(text: str) -> list[str]:
     """Return the kinds of PII/secret found in `text` (e.g. 'email', 'openai_key')."""
-    hits: List[str] = []
+    hits: list[str] = []
     if _EMAIL_RE.search(text):
         hits.append("email")
     for kind, pattern in _SECRET_RES:

@@ -2,12 +2,13 @@
 
 import os
 import time
-from typing import List, Dict, Optional, Any
-from utils.llm_client import get_llm_client
-from utils.models import SearchResult, RAGResponse
-from utils.search import create_search_engine
-from utils.logging import get_logger
+from typing import Any
+
 from utils.config import get_config
+from utils.llm_client import get_llm_client
+from utils.logging import get_logger
+from utils.models import RAGResponse, SearchResult
+from utils.search import create_search_engine
 
 logger = get_logger(__name__)
 
@@ -19,10 +20,10 @@ class ChromaRAGPipeline:
         self,
         collection_name: str = "documents",
         search_method: str = "hybrid",
-        llm_model: Optional[str] = None,
+        llm_model: str | None = None,
         temperature: float = 0.7,
         top_k: int = 3,
-        data_dir: Optional[str] = None,
+        data_dir: str | None = None,
     ):
         """Initialize Chroma RAG pipeline."""
         self.collection_name = collection_name
@@ -51,7 +52,7 @@ class ChromaRAGPipeline:
         except ImportError:
             raise ImportError("chromadb not installed. Install with: pip install chromadb")
 
-    def add_documents(self, documents: List[Dict[str, Any]]) -> None:
+    def add_documents(self, documents: list[dict[str, Any]]) -> None:
         """Add documents to Chroma collection."""
         if not documents:
             logger.warning("No documents to add")
@@ -85,7 +86,7 @@ class ChromaRAGPipeline:
         """Get number of documents in collection."""
         return self.collection.count()
 
-    def retrieve(self, query: str, top_k: Optional[int] = None) -> List[SearchResult]:
+    def retrieve(self, query: str, top_k: int | None = None) -> list[SearchResult]:
         """Retrieve relevant documents."""
         top_k = top_k or self.top_k
         docs = self._get_all_documents()
@@ -95,7 +96,7 @@ class ChromaRAGPipeline:
         self,
         query: str,
         system_prompt: str,
-        top_k: Optional[int] = None,
+        top_k: int | None = None,
     ) -> RAGResponse:
         """Generate RAG response with retrieved context."""
         start_time = time.time()
@@ -113,7 +114,7 @@ class ChromaRAGPipeline:
             elapsed_time=time.time() - start_time
         )
 
-    def _get_all_documents(self) -> List[Dict]:
+    def _get_all_documents(self) -> list[dict]:
         """Get all documents from Chroma in search format."""
         results = self.collection.get()
         return [

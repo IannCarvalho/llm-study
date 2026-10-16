@@ -25,18 +25,16 @@ pass/block decision for each.
 
 import re
 from dataclasses import dataclass, field
-from typing import List, Set
 
 from utils.data_loader import get_cve_documents
 from utils.text import tokenize
-
 
 # ---------------------------------------------------------------------------
 # Domain vocabulary (what "in scope" means for this assistant)
 # ---------------------------------------------------------------------------
 # A small fixed set of security/CVE terms. A legitimate answer about the CVE
 # knowledge base will share several of these; an off-topic answer will not.
-_DOMAIN_TERMS: Set[str] = {
+_DOMAIN_TERMS: set[str] = {
     "cve", "vulnerability", "vulnerabilities", "severity", "cvss", "score",
     "exploit", "attacker", "security", "injection", "sql", "overflow", "buffer",
     "remote", "code", "execution", "rce", "authentication", "cryptographic",
@@ -53,7 +51,7 @@ _LEAK_PHRASES = [
 ]
 
 
-def _ngrams(tokens: List[str], n: int) -> Set[str]:
+def _ngrams(tokens: list[str], n: int) -> set[str]:
     """Return the set of n-grams (as space-joined strings) in a token list."""
     return {" ".join(tokens[i:i + n]) for i in range(len(tokens) - n + 1)}
 
@@ -67,7 +65,7 @@ class OutputGuardResult:
     is_safe: bool
     leaked_system_prompt: bool = False
     out_of_scope: bool = False
-    details: List[str] = field(default_factory=list)  # human-readable reasons
+    details: list[str] = field(default_factory=list)  # human-readable reasons
 
 
 # ---------------------------------------------------------------------------
@@ -123,7 +121,7 @@ def screen_output(response: str, system_prompt: str = "") -> OutputGuardResult:
     leaked = detect_system_prompt_leak(response, system_prompt)
     oos = detect_out_of_scope(response)
 
-    details: List[str] = []
+    details: list[str] = []
     if leaked:
         details.append("system_prompt_leak: response discloses its own instructions")
     if oos:
@@ -149,7 +147,7 @@ _SYSTEM_PROMPT = (
 )
 
 
-def _example_outputs() -> List[tuple]:
+def _example_outputs() -> list[tuple]:
     """
     (label, candidate_response) cases. Grounded in the real dataset: the 'good'
     answer paraphrases CVE-2024-5678 from get_cve_documents().
