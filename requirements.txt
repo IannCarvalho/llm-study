@@ -1,10 +1,28 @@
+# Core data / validation (imported directly across utils/ and modules)
+pydantic>=2.0
+pydantic-settings>=2.0
+numpy>=1.24
+
+# Retrieval: BM25 keyword search + sentence-transformers semantic embeddings
+rank-bm25>=0.2.2
+sentence-transformers>=5.0.0
+
+# LLM stack (LangChain). langchain-core is imported directly
+# (utils/llm_client.py, utils/tools.py); langchain-openai pulls langchain in.
 langchain>=0.2.0
+langchain-core>=0.2.0
 langchain-openai>=0.1.0
 langgraph>=0.0.40
+
+# Observability / tracing (module 05). langfuse_demo.py uses get_client() and
+# run_experiment(), which langfuse 2.x does not have; tested with 5.x
+# (see constraints.txt).
 langsmith>=0.1.0
-langfuse>=2.0.0
+langfuse>=5.0.0
+
+# Vector databases (module 01 / 04)
 chromadb>=0.4.0
-pinecone
+pinecone>=5.0.0
+
+# Config / .env loading
 python-dotenv>=1.0.0
-sentence-transformers>=5.0.0
-rank-bm25>=0.2.2

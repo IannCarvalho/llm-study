@@ -1,0 +1,13 @@
+# Module 13 (13_deployment/serve.py) — serve the CVE pipeline as an HTTP API.
+# Not part of the core offline path, so kept out of requirements.txt and
+# installed on top of it when you want to run the deployment demo:
+#   pip install -r requirements.txt -r requirements-serve.txt
+#
+# Version note (see 13_deployment/README.md): install fastapi and uvicorn
+# together in a clean env. An OLD fastapi (e.g. 0.104) next to a NEW starlette
+# (1.x) is incompatible — not even a bare FastAPI() builds
+# (Router.__init__() got an unexpected keyword argument 'on_startup'). The
+# floor below pulls a modern fastapi whose pinned starlette range is coherent;
+# the exact tested pair is recorded in constraints.txt.
+fastapi>=0.110
+uvicorn>=0.23
