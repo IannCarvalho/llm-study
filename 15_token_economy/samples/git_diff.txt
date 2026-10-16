@@ -1,0 +1,9 @@
+diff --git a/utils/constants.py b/utils/constants.py
+index e57894e..4c5fc34 100644
+--- a/utils/constants.py
++++ b/utils/constants.py
+@@ -11,3 +11,4 @@ MIN_SEMANTIC_SIMILARITY = 0.0
+ LOG_LEVEL = "INFO"
+ LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+ LOG_DIR = "./logs"
++# token-economy sample marker
