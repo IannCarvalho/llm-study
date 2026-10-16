@@ -7,13 +7,13 @@ wandering off-topic, and the only place to catch that is the output. These check
 are deterministic heuristics (regex + token overlap), so they run with no LLM and
 give the same verdict every time — a property you want for a last line of defense.
 
-Threats covered, mapped to the OWASP Top 10 for LLM Applications:
+Threats covered, mapped to the OWASP Top 10 for LLM Applications (2025 edition):
 
-- System-prompt / instruction leakage (LLM06 — sensitive information disclosure):
+- System prompt leakage (LLM07:2025):
   the response echoes the confidential system prompt or its tell-tale phrasing.
   We detect it two ways: a strong n-gram overlap with the known system prompt,
   and explicit "my instructions are..." style give-aways.
-- Out-of-scope / topic drift (a scope control, adjacent to LLM09 overreliance):
+- Out-of-scope / topic drift (a scope control, adjacent to LLM09:2025 misinformation):
   this assistant answers only about the CVE knowledge base. A response with no
   lexical connection to the allowed domain is flagged so it is not shown as if it
   were a grounded, in-scope answer.
