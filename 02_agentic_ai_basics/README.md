@@ -61,7 +61,7 @@ Dados e utilitários compartilhados pelos dois:
 
 - `QUERY = "What is CVE-2024-1234?"` e `CVE_ID = "CVE-2024-1234"`, de `utils/agentic_utils.py`.
 - A tool `search_cve` (de `utils/tools.py`), que consulta a base `utils/data/cves.json` via `utils.data_loader`.
-- Os prompts de sistema `TOOL_USE_SYSTEM` e `REACT_SYSTEM`, de `utils/prompts/`.
+- Os prompts de sistema `TOOL_USE_SYSTEM` e `REACT_SYSTEM`, de `utils/prompts/`: cada prompt é um arquivo `.txt` (`tool_use.txt`, `react.txt`) carregado pela classe `PromptTemplates`.
 
 A base é de **3 CVEs sintéticos** (produtos fictícios) — nunca CVEs reais. Detalhes no [README raiz](../README.md#base-de-dados-cves-sintéticos).
 
