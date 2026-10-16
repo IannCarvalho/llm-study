@@ -28,6 +28,7 @@ from dataclasses import dataclass, field
 from typing import List, Set
 
 from utils.data_loader import get_cve_documents
+from utils.text import tokenize
 
 
 # ---------------------------------------------------------------------------
@@ -50,11 +51,6 @@ _LEAK_PHRASES = [
     re.compile(r"\bas\s+an?\s+(AI|assistant),?\s+my\s+instructions\b", re.I),
     re.compile(r"\byou\s+are\s+a\s+helpful\s+(security\s+)?assistant\b", re.I),  # common system-prompt opener
 ]
-
-
-def _tokenize(text: str) -> List[str]:
-    """Lowercase word-token split (mirrors the retriever's tokenizer)."""
-    return re.findall(r"\w+", text.lower())
 
 
 def _ngrams(tokens: List[str], n: int) -> Set[str]:
@@ -94,8 +90,8 @@ def detect_system_prompt_leak(response: str, system_prompt: str, ngram_n: int = 
             return True
 
     if system_prompt.strip():
-        sys_ngrams = _ngrams(_tokenize(system_prompt), ngram_n)
-        resp_ngrams = _ngrams(_tokenize(response), ngram_n)
+        sys_ngrams = _ngrams(tokenize(system_prompt), ngram_n)
+        resp_ngrams = _ngrams(tokenize(response), ngram_n)
         if len(sys_ngrams & resp_ngrams) >= overlap_threshold:
             return True
 
@@ -111,7 +107,7 @@ def detect_out_of_scope(response: str, min_domain_terms: int = 1) -> bool:
     short but legitimate answer is not blocked — the goal is to catch answers that
     are *entirely* unrelated (recipes, poems, small talk), not to grade relevance.
     """
-    tokens = set(_tokenize(response))
+    tokens = set(tokenize(response))
     matched = tokens & _DOMAIN_TERMS
     return len(matched) < min_domain_terms
 

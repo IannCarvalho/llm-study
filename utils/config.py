@@ -1,32 +1,49 @@
-"""Centralized Configuration - Environment Variables"""
+"""Centralized Configuration - Environment Variables
+
+Single place where the project reads its configuration:
+
+- ``Settings`` holds OUR settings (model, endpoint, temperature, ...). Each field
+  maps to the environment variable of the same name, case-insensitively
+  (``ollama_model`` <- ``OLLAMA_MODEL``), read from the real environment or `.env`.
+- ``load_dotenv()`` runs once, when this module is imported, so third-party SDKs
+  that read ``os.environ`` directly (LangSmith, Langfuse, Pinecone, Hugging Face)
+  see the same `.env`. Other modules should not call it again.
+"""
 
 import logging
 from typing import Optional
-from pydantic_settings import BaseSettings
+
+from dotenv import load_dotenv
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
+
+# Export `.env` to os.environ for the SDKs above. Variables already set in the
+# real environment are never overridden.
+load_dotenv()
 
 
 class Settings(BaseSettings):
     """Loads configuration from environment variables and .env file."""
 
-    ollama_model: str = Field(default="mistral", env="OLLAMA_MODEL")
-    ollama_base_url: str = Field(default="http://localhost:11434/v1", env="OLLAMA_BASE_URL")
-    openai_api_key: str = Field(default="ollama", env="OPENAI_API_KEY")
-    llm_temperature: float = Field(default=0.7, ge=0.0, le=2.0, env="LLM_TEMPERATURE")
-    llm_max_tokens: int = Field(default=512, ge=1, le=4096, env="LLM_MAX_TOKENS")
-    chroma_path: str = Field(default="./data/chroma", env="CHROMA_PATH")
-    pinecone_api_key: Optional[str] = Field(default=None, env="PINECONE_API_KEY")
-    hf_token: Optional[str] = Field(default=None, env="HF_TOKEN")
-    debug: bool = Field(default=False, env="DEBUG")
-    log_level: str = Field(default="INFO", env="LOG_LEVEL")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        extra = "ignore"
+    ollama_model: str = Field(default="mistral")
+    ollama_base_url: str = Field(default="http://localhost:11434/v1")
+    openai_api_key: str = Field(default="ollama")
+    llm_temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    llm_max_tokens: int = Field(default=512, ge=1, le=4096)
+    chroma_path: str = Field(default="./data/chroma")
+    pinecone_api_key: Optional[str] = Field(default=None)
+    hf_token: Optional[str] = Field(default=None)
+    debug: bool = Field(default=False)
+    log_level: str = Field(default="INFO")
 
 
 _settings: Optional[Settings] = None

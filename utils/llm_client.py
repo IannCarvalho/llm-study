@@ -17,13 +17,11 @@ Usage:
 """
 
 from typing import Optional
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from utils.config import get_config
 from utils.logging import get_logger
 
-load_dotenv()
 logger = get_logger(__name__)
 
 

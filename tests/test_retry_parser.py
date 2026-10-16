@@ -2,7 +2,7 @@
 Deterministic tests for 10_structured_output/retry_parser.py.
 
 Exercises the parse / validate / retry engine with LOCAL fake generators (no
-LLM), mirroring the module's own _demo(): valid-first-try, fenced JSON, prose-
+LLM), mirroring the module's own main(): valid-first-try, fenced JSON, prose-
 wrapped JSON, self-correction across retries, and clean give-up. Also tests the
 two text-cleaning helpers directly.
 """
@@ -17,7 +17,7 @@ from conftest import load_module
 rp = load_module("10_structured_output/retry_parser.py", "retry_parser")
 
 
-# A small schema the parser validates against (mirrors _demo's Widget).
+# A small schema the parser validates against (mirrors the Widget used by the module's main()).
 class Color(str, Enum):
     RED = "red"
     GREEN = "green"

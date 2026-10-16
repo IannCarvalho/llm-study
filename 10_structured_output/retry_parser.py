@@ -179,7 +179,7 @@ def parse_with_retry(
 # Deterministic self-test — no LLM required.
 # ---------------------------------------------------------------------------
 
-def _demo() -> None:
+def main() -> None:
     """Exercise the parser against simulated generator outputs."""
     from enum import Enum
 
@@ -262,4 +262,4 @@ def _demo() -> None:
 
 
 if __name__ == "__main__":
-    _demo()
+    main()

@@ -9,21 +9,18 @@ Setup:
     3. Create index via Pinecone console
 """
 
-import os
-from dotenv import load_dotenv
 from pinecone import Pinecone
+from utils.config import get_config
 from utils.llm_client import get_llm_client
 from utils.prompts import RAG_SYSTEM
 from utils.data_loader import load_cves
 from utils.agentic_utils import QUERY
-from utils.semantic_embeddings import embed_texts
-
-load_dotenv()
+from utils.semantic_embeddings import embed_text, embed_texts
 
 
 def main():
     """Run Pinecone RAG pipeline."""
-    api_key = os.getenv("PINECONE_API_KEY")
+    api_key = get_config().pinecone_api_key
     if not api_key:
         print("Error: PINECONE_API_KEY not configured in .env")
         print("Get it from: https://www.pinecone.io")
@@ -61,7 +58,6 @@ def main():
     print(f"Upserted {len(cves_with_embeddings)} documents\n")
     
     # Generate real embedding for query
-    from utils.semantic_embeddings import embed_text
     query_embedding = embed_text(QUERY).tolist()
     
     print(f"Query: '{QUERY}'")

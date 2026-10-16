@@ -17,11 +17,11 @@ The retriever under test is the project's hybrid engine
 inputs always yield the same ranking, so the reported numbers are reproducible.
 """
 
-import re
 from typing import Dict, List, Set
 
-from utils.search import create_search_engine
+from utils.search import as_search_documents, create_search_engine
 from utils.data_loader import get_cve_documents
+from utils.text import content_terms
 
 # ---------------------------------------------------------------------------
 # Evaluation set
@@ -52,14 +52,9 @@ _STOPWORDS: Set[str] = {
 }
 
 
-def _tokenize(text: str) -> List[str]:
-    """Lowercase word-token split (mirrors the retriever's own tokenizer)."""
-    return re.findall(r"\w+", text.lower())
-
-
 def _content_terms(text: str) -> Set[str]:
-    """Content-bearing terms: tokens minus stopwords and pure numbers."""
-    return {t for t in _tokenize(text) if t not in _STOPWORDS and not t.isdigit()}
+    """Content-bearing terms: tokens minus this module's stopwords and pure numbers."""
+    return content_terms(text, _STOPWORDS)
 
 
 def precision_at_k(retrieved_ids: List[str], relevant_ids: Set[str], k: int) -> float:
@@ -107,10 +102,7 @@ def groundedness_proxy(query: str, retrieved_docs: List[str]) -> float:
 
 def build_documents() -> List[Dict]:
     """Adapt get_cve_documents() {id: text} into the retriever's doc shape."""
-    return [
-        {"id": cve_id, "content": text, "metadata": {}}
-        for cve_id, text in get_cve_documents().items()
-    ]
+    return as_search_documents(get_cve_documents())
 
 
 def main() -> None:

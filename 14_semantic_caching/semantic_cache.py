@@ -126,7 +126,7 @@ class SemanticCache:
         return None, sim
 
 
-def _demo() -> int:
+def main() -> int:
     """
     Demo deterministica (sem Ollama): popula o cache com queries sobre CVEs,
     mostra HIT em query parafraseada e MISS em query distante, e imprime metricas.
@@ -199,4 +199,4 @@ def _demo() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(_demo())
+    raise SystemExit(main())

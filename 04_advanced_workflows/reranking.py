@@ -43,12 +43,12 @@ Optional (real cross-encoder, downloads a small model on first run):
     pip install sentence-transformers
 """
 
-import re
 from typing import Dict, List, Set, Tuple
 
 from utils.search import create_search_engine
 from utils.data_loader import get_cve_documents
 from utils.models import SearchResult
+from utils.text import content_terms
 from utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -106,14 +106,9 @@ _STOPWORDS: Set[str] = {
 }
 
 
-def _tokenize(text: str) -> List[str]:
-    """Lowercase word-token split (mirrors the retriever's own tokenizer)."""
-    return re.findall(r"\w+", text.lower())
-
-
 def _content_terms(text: str) -> Set[str]:
-    """Content-bearing terms: tokens minus stopwords and pure numbers."""
-    return {t for t in _tokenize(text) if t not in _STOPWORDS and not t.isdigit()}
+    """Content-bearing terms: tokens minus this module's stopwords and pure numbers."""
+    return content_terms(text, _STOPWORDS)
 
 
 def _overlap_score(query: str, document: str) -> float:

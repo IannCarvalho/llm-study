@@ -4,7 +4,7 @@ Pydantic Models - Type-safe data schemas
 Centralized data structures for validation and serialization.
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Optional, List, Dict, Any
 from enum import Enum
 
@@ -45,8 +45,7 @@ class CVEMetadata(BaseModel):
     published_date: Optional[str] = None
     vulnerability_type: VulnerabilityType = VulnerabilityType.OTHER
 
-    class Config:
-        use_enum_values = False
+    model_config = ConfigDict(use_enum_values=False)
 
 
 class CVEData(BaseModel):
@@ -59,11 +58,11 @@ class CVEData(BaseModel):
     cvss_vector: str
     metadata: Dict[str, Any] = {}
 
-    class Config:
-        use_enum_values = False
+    model_config = ConfigDict(use_enum_values=False)
 
-    @validator("description")
-    def description_not_empty(cls, v):
+    @field_validator("description")
+    @classmethod
+    def description_not_empty(cls, v: str) -> str:
         """Ensure description is not empty."""
         if not v or not v.strip():
             raise ValueError("Description cannot be empty")
@@ -80,8 +79,7 @@ class VulnerabilityMetadata(BaseModel):
     cve_id: Optional[str] = None
     tags: List[str] = []
 
-    class Config:
-        use_enum_values = False
+    model_config = ConfigDict(use_enum_values=False)
 
 
 class Vulnerability(BaseModel):
@@ -90,8 +88,7 @@ class Vulnerability(BaseModel):
     text: str
     metadata: VulnerabilityMetadata
 
-    class Config:
-        use_enum_values = False
+    model_config = ConfigDict(use_enum_values=False)
 
 
 class Document(BaseModel):

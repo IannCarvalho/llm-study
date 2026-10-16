@@ -69,11 +69,11 @@ def build_graph():
     return graph.compile()
 
 
-if __name__ == "__main__":
+def main() -> None:
     print("=" * 70)
     print("LangGraph Basics: Linear Pipeline")
     print("=" * 70)
-    
+
     app = build_graph()
     result = app.invoke({
         "cve_id": CVE_ID,
@@ -81,10 +81,12 @@ if __name__ == "__main__":
         "summary": ""
     })
 
-
-    
     print("\n" + "=" * 70)
     print("Final State:")
     print(f"  CVE ID: {result['cve_id']}")
     print(f"  Summary: {result['summary']}")
     print("=" * 70)
+
+
+if __name__ == "__main__":
+    main()
