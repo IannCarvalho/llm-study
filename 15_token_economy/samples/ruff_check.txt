@@ -1,0 +1,69 @@
+W291 Trailing whitespace
+  --> <repo>/utils/__init__.py:22:64
+   |
+22 | Lazy loading: Imports are deferred until first access, avoiding
+   |                                                                ^
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+  --> <repo>/utils/__init__.py:67:1
+   |
+67 |
+   | ^^^^
+help: Remove whitespace from blank line
+
+UP035 `typing.List` is deprecated, use `list` instead
+  --> <repo>/utils/chunking_utils.py:11:1
+   |
+11 | from typing import List
+   | ^^^^^^^^^^^^^^^^^^^^^^^
+
+UP006 [*] Use `list` instead of `List` for type annotation
+  --> <repo>/utils/chunking_utils.py:19:6
+   |
+19 | ) -> List[str]:
+   |      ^^^^
+help: Replace with `list`
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> <repo>/utils/config.py:3:1
+   |
+ 3 | / import logging
+ 4 | | from typing import Optional
+ 5 | | from pydantic_settings import BaseSettings
+ 6 | | from pydantic import Field
+   | |__________________________^
+help: Organize imports
+
+UP045 [*] Use `X | None` for type annotations
+  --> <repo>/utils/config.py:20:23
+   |
+20 |     pinecone_api_key: Optional[str] = Field(default=None, env="PINECONE_API_KEY")
+   |                       ^^^^^^^^^^^^^
+help: Convert to `X | None`
+
+UP042 Class SeverityLevel inherits from both `str` and `enum.Enum`
+  --> <repo>/utils/models.py:16:7
+   |
+16 | class SeverityLevel(str, Enum):
+   |       ^^^^^^^^^^^^^
+help: Inherit from `enum.StrEnum`
+
+B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`
+  --> <repo>/utils/rag_pipeline.py:52:13
+   |
+52 |             raise ImportError("chromadb not installed. Install with: pip install chromadb")
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+UP007 [*] Use `X | Y` for type annotations
+  --> <repo>/utils/search.py:165:63
+   |
+165 | def create_search_engine(method: str = "hybrid", **kwargs) -> Union[BM25Search, SemanticSearch, HybridSearch]:
+   |                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: Convert to `X | Y`
+
+W292 [*] No newline at end of file
+  --> <repo>/utils/tools.py:31:43
+
+Found 239 errors.
+[*] 185 fixable with `--fix` (38 unsafe fixes available with `--fix --unsafe-fixes`).
