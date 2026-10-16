@@ -1,294 +1,34 @@
-# Module 05: Observability — LangSmith & LangFuse
+# 05 — Observabilidade (LangSmith e Langfuse)
 
-This module covers observability tools for agent development and debugging.
-## Overview
+> Pré-requisitos: **não roda offline** — os dois scripts só fazem algo útil com um LLM.
+> A parte central precisa de um LLM via `utils.llm_client` (Ollama local por padrão; veja
+> [../LLM_SETUP.md](../LLM_SETUP.md)). Para que os traces cheguem às plataformas você também
+> precisa de chaves: LangSmith (`LANGCHAIN_API_KEY`) e/ou Langfuse
+> (`LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY`). Sem LLM, os scripts degradam com mensagem
+> instrutiva (não travam). O Langfuse ainda precisa do pacote `langfuse` instalado.
 
-Observability is critical in production for:
-- Understanding agent execution flow
-- Debugging failures and bottlenecks
-- Measuring latency and token usage
-- Collecting user feedback
-- Comparing multiple versions
+Observabilidade é como você enxerga o que um agente fez por dentro: qual passo rodou, quanto
+tempo levou, quantos tokens gastou e onde errou. Este módulo mostra duas ferramentas que
+instrumentam aplicações LLM — **LangSmith** (nativa do ecossistema LangChain) e **Langfuse**
+(open-source, funciona com qualquer provedor) — rodando sobre a mesma base de CVEs dos outros
+módulos.
 
-## Files
+## Por que importa
 
-### 1. langsmith_demo.py — LangChain Tracing
-LangSmith is the official observability platform for LangChain projects.
+Em produção, uma resposta errada ou lenta de um agente é quase impossível de depurar sem
+instrumentação. Observabilidade resolve isso dando visibilidade sobre:
 
-Setup:
-1. Create account at https://smith.langchain.com (free tier available)
-2. Generate API key
-3. Configure environment variables
+- O fluxo de execução do agente (quais nós/passos rodaram e em que ordem)
+- Falhas e gargalos (qual passo demorou ou estourou)
+- Latência e uso de tokens (e, com isso, custo)
+- Feedback do usuário (scores, anotações)
+- Comparação entre versões (prompts, modelos, parâmetros)
 
-```python
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_API_KEY"] = "your-api-key"
-os.environ["LANGCHAIN_PROJECT"] = "llm-study"
-```
+## Conceitos
 
-### 2. langfuse_demo.py — LangFuse Analytics
-LangFuse provides detailed analytics for LLM applications.
+### Trace (rastro)
+Uma execução completa do seu sistema, do input ao output final. Um trace agrupa vários spans.
 
-How it works:
-```
-Your Code (LangChain/LangGraph)
-    ↓
-[Automatic Instrumentation]
-    ↓
-LangFuse API
-    ↓
-Dashboard at https://cloud.langfuse.com
-```
-
-Dashboard shows:
-- Traces: Complete execution flows with timing and tokens
-- Cost: Token usage and estimated costs
-- Errors: Failures and exceptions
-- Performance: Latency distributions
-- Feedback: User ratings and annotations
-```
-
-2. **Spans** — Operações dentro do trace
-```
-Span 1: call_llm
-├─ Input: "Search for CVE-2024-1234"
-├─ Duration: 1.8s
-├─ Output: "Found critical vulnerability..."
-└─ Tokens: 120
-
-Span 2: tool_execution (search_cve)
-├─ Duration: 0.4s
-├─ Result: {"severity": "CRITICAL", ...}
-```
-
-3. **Latência por Componente**
-```
-search_cve: 400ms (tool)
-llm_call_1: 1800ms (thinking)
-llm_call_2: 140ms (analysis)
-─────────────────────
-Total: 2340ms
-```
-
-4. **Custo em Tokens**
-```
-Input Tokens: 145
-Output Tokens: 100
-Total: 245 tokens
-Estimated Cost: $0.000735
-```
-
-**Exemplo Prático com LangChain**:
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import HumanMessage
-
-# Setup automático via .env
-model = ChatAnthropic(model="claude-3-5-sonnet-20241022")
-
-# Isso já é traced!
-response = model.invoke([
-    HumanMessage(content="What is SQL injection?")
-])
-
-# Aparece automaticamente no dashboard
-# Você vê:
-# - Input: "What is SQL injection?"
-# - Output: "SQL injection is..."
-# - Latência: 1.2s
-# - Tokens: 450
-```
-
-**Exemplo com LangGraph (Agente)**:
-```python
-from langgraph.graph import StateGraph, END
-
-# Definir seu grafo normalmente...
-graph = StateGraph(VulnerabilityState)
-graph.add_node("analyze", analyze_func)
-graph.add_node("escalate", escalate_func)
-app = graph.compile()
-
-# Execução automática é tracida
-result = app.invoke({
-    "query": "Analyze CVE-2024-1234"
-})
-
-# Dashboard mostra:
-# - Cada nó executado
-# - Transições entre nós
-# - Estado em cada passo
-# - Decisões de roteamento
-```
-
-**Vantagens LangSmith**:
-- ✅ Integração automática com LangChain/LangGraph
-- ✅ Zero código extra necessário
-- ✅ Ricas visualizações
-- ✅ Fácil debugging
-- ✅ Comparar runs diferentes
-- ✅ Feedback de usuários
-
-**Desvantagens**:
-- ❌ Requer conta na plataforma
-- ❌ Dados enviados para servers LangChain
-- ❌ Pode ter custo em escala
-- ❌ Vendor lock-in
-
-**Rodar**:
-```bash
-# Setup: configure LANGCHAIN_API_KEY primeiro
-python 03_observability/langsmith_example.py
-
-# Output:
-# Saiba onde ir: https://smith.langchain.com
-# Veja seus traces lá!
-```
-
----
-
-### 2. **langfuse_example.py** — Observabilidade Open-Source
-**O que é**: Alternativa open-source/self-hosted para LangSmith
-
-**Diferencial**:
-- Open-source (pode hospedar você mesmo)
-- Funciona com Anthropic, OpenAI, Ollama, qualquer coisa
-- Mais flexível
-- Feedback explícito (scores, comments)
-
-**Setup**:
-```bash
-# Opção 1: Cloud gratuito
-pip install langfuse
-
-# Opção 2: Self-hosted
-git clone https://github.com/langfuse/langfuse
-docker-compose up
-```
-
-**Configuração**:
-```python
-from langfuse import Langfuse
-from langfuse.decorators import observe
-
-# Cloud
-langfuse = Langfuse(
-    public_key="pk_...",
-    secret_key="sk_...",
-    host="https://cloud.langfuse.com"
-)
-
-# Self-hosted
-langfuse = Langfuse(
-    public_key="pk_...",
-    secret_key="sk_...",
-    host="http://localhost:3000"
-)
-```
-
-**Dois Modos de Uso**:
-
-#### Modo 1: Decoradores (Simples)
-```python
-from langfuse.decorators import observe
-
-@observe()
-def analyze_code_security(code: str) -> str:
-    """Função automaticamente rastreada."""
-    response = client.messages.create(
-        model="claude-3-5-sonnet-20241022",
-        max_tokens=512,
-        messages=[{
-            "role": "user",
-            "content": f"Analyze code: {code}"
-        }]
-    )
-    return response.content[0].text
-
-# Usar normalmente
-result = analyze_code_security("SELECT * FROM users WHERE id=" + user_input)
-# Já está no LangFuse!
-```
-
-**O que aparece no dashboard**:
-```
-Trace: analyze_code_security
-├─ Input: "SELECT * FROM users WHERE id=..."
-├─ Output: "This code has SQL injection at..."
-├─ Duration: 1.2s
-├─ Model: claude-3-5-sonnet
-├─ Tokens: 340
-└─ Status: Completed
-```
-
-#### Modo 2: Tracing Manual (Controle Total)
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-# Criar uma trace (execução completa)
-trace = langfuse.trace(
-    name="security_audit",
-    input={"host": "example.com"}
-)
-
-# Criar spans (operações dentro da trace)
-span1 = trace.span(name="port_scan")
-# ... executar escaneo
-span1.end(output={"ports": [80, 443, 22]})
-
-span2 = trace.span(name="analyze_results")
-# ... analisar
-span2.end(output={"risk": "HIGH"})
-
-# Finalizar
-trace.end(output={"report": "..."})
-```
-
-**Feedback de Usuários**:
-```python
-trace = langfuse.trace(name="recommend_patch")
-# ... executar
-trace.generation_id = gen_id
-
-# Depois o usuário diz se gostou
-trace.score(
-    name="user_feedback",
-    value=1  # 0 = ruim, 1 = bom
-)
-
-# Ou comentário
-trace.metadata = {
-    "comment": "Patched successfully"
-}
-```
-
-**Vantagens LangFuse**:
-- ✅ Open-source (pode auto-hospedar)
-- ✅ Funciona com ANY LLM
-- ✅ Feedback explícito
-- ✅ Mais controle
-- ✅ Sem vendor lock-in
-
-**Desvantagens**:
-- ❌ Requer setup manual se self-hosted
-- ❌ Menos integrado que LangSmith
-- ❌ Comunidade menor
-
-**Rodar**:
-```bash
-pip install langfuse
-
-python 03_observability/langfuse_example.py
-```
-
----
-
-## 🎓 Conceitos Chave
-
-### Trace
-Uma execução completa do seu sistema
 ```
 User Query
     ↓ ┌─────────────────────── TRACE ──────────────────────┐
@@ -305,8 +45,9 @@ Final Output                                                │
     └──────────────────────────────────────────────────────┘
 ```
 
-### Span
-Uma operação dentro da trace
+### Span (operação)
+Uma operação dentro do trace, com seu próprio input, duração, output e status.
+
 ```
 Span: "search_vector_db"
 ├─ Input: {"query": "SQL injection", "top_k": 5}
@@ -315,16 +56,20 @@ Span: "search_vector_db"
 └─ Status: Success
 ```
 
-### Latency Analysis
+### Análise de latência
+Somando a duração dos spans você vê onde está o gargalo — tipicamente a chamada ao LLM.
+
 ```
 Total: 2.45s
 ├─ Vector DB Search: 234ms (10%)
-├─ LLM Call: 1800ms (73%)  ← Bottleneck!
+├─ LLM Call: 1800ms (73%)  ← Gargalo!
 ├─ Post-processing: 120ms (5%)
 └─ Network: 291ms (12%)
 ```
 
-### Token Usage
+### Uso de tokens (e custo)
+Tokens de entrada e de saída por trace; o custo sai de `tokens × preço por token` do provedor.
+
 ```
 Input Tokens: 450
 ├─ System Prompt: 120
@@ -332,131 +77,198 @@ Input Tokens: 450
 └─ User Query: 150
 
 Output Tokens: 320
-├─ Main Response: 280
-└─ Reasoning: 40
 
 Total: 770 tokens
-Cost: 770 * $0.003/1k ≈ $0.0023
 ```
 
----
+> Os números acima são **ilustrativos** (exemplos didáticos de leitura de um dashboard), não a
+> saída dos scripts deste módulo. Preços variam por provedor e modelo — consulte a página de
+> preços oficial (ex.: [OpenAI Pricing](https://openai.com/api/pricing/)).
 
-## 🔧 Setup
+### LangSmith × Langfuse
 
-### LangSmith
+| | LangSmith | Langfuse |
+|---|-----------|----------|
+| Integração | Automática com LangChain/LangGraph | OpenAI-compatível e qualquer stack |
+| Código | Zero instrumentação extra (liga por env var) | Wrapper/decorador, mais controle manual |
+| Hospedagem | SaaS (dados vão para servidores LangChain) | Cloud **ou** self-hosted (open-source) |
+| Feedback | Sim | Sim (scores/evaluators explícitos) |
+| Trade-off | Simples, mas vendor lock-in | Flexível, mas setup maior se self-hosted |
+
+## Arquivos
+
+### `langsmith_demo.py` — tracing automático do LangChain
+Monta uma chain LCEL simples (`ChatPromptTemplate | llm`) com o modelo de chat de
+`utils.llm_client` e o template `ASSISTANT_QA_SYSTEM` de `utils.prompts`, e roda os exemplos de
+`utils.agentic_utils.get_cve_qa_examples()` (um por CVE da base). Quando o tracing do LangSmith
+está ligado, **cada `chain.invoke` é rastreado automaticamente** — nenhuma instrumentação no
+código. O script imprime os valores de `LANGCHAIN_TRACING_V2`/`LANGCHAIN_PROJECT` que leu do
+ambiente e, no fim, diz se o tracing está ligado (`LANGCHAIN_TRACING_V2=true`) ou não.
+
+O gatilho do tracing é a função `tracing_enabled()`, que só retorna `True` quando
+`LANGCHAIN_TRACING_V2` vale exatamente `"true"`.
+
+### `langfuse_demo.py` — experimento com evaluators (Langfuse)
+Usa o **SDK moderno do Langfuse** (v3+): `get_client()` para o cliente e
+`langfuse.openai.OpenAI` como wrapper drop-in que transforma cada chamada de completion em uma
+*generation* no dashboard. O cliente aponta para o endpoint do `.env` (Ollama por padrão), então
+o mesmo switch de provedor dos outros módulos vale aqui.
+
+A demo monta um dataset local a partir de `get_cve_qa_examples()` (campos `input`/`expected`) e
+roda `langfuse_client.run_experiment(...)` com dois evaluators de item:
+
+- `evaluate_accuracy`: a resposta contém a palavra-chave esperada? (score 0/1)
+- `evaluate_response_length`: o tamanho da resposta está na faixa aceitável?
+
+e dois run-evaluators de agregação (`evaluate_average_accuracy`,
+`evaluate_average_response_length`). No fim chama `langfuse_client.flush()` para garantir que
+traces e scores sejam enviados antes do processo terminar.
+
+> Os dois scripts têm `def main()` e `if __name__ == "__main__": main()` — **nada roda no
+> import**, então você pode importá-los nos testes sem disparar chamadas de rede.
+
+## Como rodar
+
+A partir da raiz do repositório, com o `PYTHONPATH` apontando para a raiz:
+
+**PowerShell (Windows):**
+```powershell
+$env:PYTHONPATH = "."
+python -m 05_observability.langsmith_demo
+python -m 05_observability.langfuse_demo
+```
+
+**Bash (Linux/macOS):**
 ```bash
-# 1. Criar conta
-# https://smith.langchain.com
+export PYTHONPATH="."
+python -m 05_observability.langsmith_demo
+python -m 05_observability.langfuse_demo
+```
 
-# 2. Copiar API key
+Setup de provedor de LLM (Ollama / LM Studio / OpenAI): [../LLM_SETUP.md](../LLM_SETUP.md).
 
-# 3. Configurar .env
+### Configuração do LangSmith
+O LangSmith liga por variáveis de ambiente, lidas direto pela biblioteca (não passam pelo
+`utils.config.Settings`). Coloque-as no `.env`:
+
+```
 LANGCHAIN_TRACING_V2=true
-LANGCHAIN_API_KEY=your-api-key-here
+LANGCHAIN_API_KEY=sua-chave
 LANGCHAIN_PROJECT=llm-study
-
-# 4. Usar LangChain/LangGraph normalmente
-# Tudo é automaticamente tracido!
 ```
 
-### LangFuse (Cloud)
-```bash
-# 1. Criar conta
-# https://cloud.langfuse.com
+> O código deste módulo lê `LANGCHAIN_TRACING_V2`/`LANGCHAIN_PROJECT`. A documentação atual da
+> LangChain usa os nomes `LANGSMITH_TRACING` / `LANGSMITH_API_KEY` / `LANGSMITH_PROJECT`; os
+> nomes antigos `LANGCHAIN_*` continuam funcionando. Crie a conta e a chave em
+> [smith.langchain.com](https://smith.langchain.com).
 
-# 2. Instalar
-pip install langfuse
+### Configuração do Langfuse
+O pacote `langfuse` já vem no `requirements.txt`. Configure as credenciais no `.env`:
 
-# 3. Configurar
-export LANGFUSE_PUBLIC_KEY=pk_...
-export LANGFUSE_SECRET_KEY=sk_...
+```
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com   # região EU; US: https://us.cloud.langfuse.com
 ```
 
-### LangFuse (Self-Hosted)
-```bash
-# 1. Docker
-docker-compose up
+- **Cloud:** crie a conta em [cloud.langfuse.com](https://cloud.langfuse.com) e copie as chaves.
+- **Self-hosted (open-source):** veja o guia oficial em
+  [langfuse.com/self-hosting](https://langfuse.com/self-hosting). O `LANGFUSE_BASE_URL` aponta
+  para a sua instância.
+- O SDK ainda aceita o nome antigo `LANGFUSE_HOST`, marcado como obsoleto em favor de
+  `LANGFUSE_BASE_URL`.
 
-# 2. Acessar
-http://localhost:3000
+## O que a demo mostra
 
-# 3. Copiar credentials
-# Configure em seu código
+Nesta máquina o Ollama estava **desligado** e sem chaves configuradas. As saídas abaixo são as
+execuções reais (exit=0 nos dois casos — os scripts degradam, não quebram).
+
+### `langsmith_demo.py`
+Sem LLM, cada chamada da chain falha com erro de conexão, e o script reporta que o tracing está
+desligado:
+
+```
+LangSmith Integration with Local LLM
+
+LANGCHAIN_TRACING_V2: None
+LANGCHAIN_PROJECT: None
+
+================================================================================
+Processing 3 examples...
+
+(1) Remote code execution vulnerability in WebServer v2.1. An unauthenticated attack...
+    Error: Connection error.
+
+(2) SQL injection vulnerability in AuthService v1.5 authentication module. The vulne...
+    Error: Connection error.
+
+(3) Cryptographic weakness in DataEncryption library v3.2. The implementation uses a...
+    Error: Connection error.
+
+================================================================================
+Tracing is OFF: set LANGCHAIN_TRACING_V2=true and LANGCHAIN_API_KEY in .env.
 ```
 
----
+Com o Ollama ligado, as linhas `Error: Connection error.` dão lugar ao início da resposta do
+modelo (truncada em 80 caracteres); com `LANGCHAIN_TRACING_V2=true` e a chave, cada execução
+aparece como um trace no painel do LangSmith.
 
----
+### `langfuse_demo.py`
+O experimento processa os 3 exemplos; sem LLM, não há saída para avaliar, então o resultado fica
+vazio (e o agregado dispara erros de score, porque a média de uma lista vazia é `None`):
 
-## 💡 Casos de Uso — Interview Ready
-
-### Caso 1: Debugging de Agente em Produção
 ```
-"Agente ocasionalmente retorna resposta errada. Como debugar?"
+Running Langfuse Experiment with Evaluators
 
-Solução:
-1. Olhar trace no LangSmith
-2. Ver exatamente qual nó falhou
-3. Ver inputs/outputs de cada span
-4. Identificar bottleneck (LLM? Vector DB? Tool?)
-5. Corrigir
+Testing 3 queries with mistral + Evaluators
 
-Exemplo Real:
-- Trace 1: LLM demorou 5s → aumentar timeout
-- Trace 2: Vector DB retornou contexto errado → ajustar chunking
-- Trace 3: Tool falhou → adicionar retry logic
-```
+  Processing: Remote code execution vulnerability in WebServer v...
+  Processing: SQL injection vulnerability in AuthService v1.5 au...
+  Processing: Cryptographic weakness in DataEncryption library v...
 
-### Caso 2: Custo x Qualidade
-```
-"Como balancear custo de tokens vs qualidade de resposta?"
+================================================================================
+Experiment with Evaluators completed!
 
-Solução:
-1. Medir tokens por trace em LangFuse
-2. Comparar qualidade (user feedback score)
-3. Ajustar:
-   - Tamanho do contexto
-   - Número de documentos recuperados
-   - Prompt size
-   - Model size
+No experiment results to display.
 
-Exemplo:
-- Versão 1: GPT-4 = $0.15/req, qualidade 0.95
-- Versão 2: GPT-3.5 = $0.02/req, qualidade 0.87
-- Versão 3: Ollama (local) = $0/req, qualidade 0.84
-  → Escolher baseado em trade-off
+================================================================================
+Results sent to Langfuse (see the experiment in your project).
 ```
 
-### Caso 3: A/B Testing de Prompts
-```
-"Qual prompt funciona melhor?"
+O stderr mostra que os run-evaluators tentaram enviar um score `None` e o Langfuse recusou
+(`CreateScoreRequest` exige número): consequência direta de rodar sem LLM. Com o modelo ligado,
+cada pergunta é respondida, os evaluators pontuam accuracy/tamanho e o `result.format()` imprime
+a tabela de scores.
 
-LangSmith permite:
-1. Versão A: Prompt antigo
-2. Versão B: Prompt novo
-3. Comparar métricas:
-   - Latência
-   - Token usage
-   - User feedback score
-4. Decidir qual usar
+## Exercícios
 
-Integração:
-- Tag traces com versão
-- Filtrar no dashboard
-- Ver stats lado a lado
-```
+1. **Ligue o tracing sem rodar o LLM remoto.** Defina `LANGCHAIN_TRACING_V2=true` no ambiente e
+   rode `langsmith_demo.py` com o Ollama **desligado**. Observe que `tracing_enabled()` passa a
+   `True` e a mensagem final muda, mesmo com as chamadas ainda falhando por conexão. Qual é a
+   consequência de ter tracing ligado mas o LLM indisponível?
+2. **Adicione um evaluator ao Langfuse.** Escreva um novo evaluator de item em `langfuse_demo.py`
+   (ex.: `evaluate_mentions_cve` que dá 1.0 se a resposta cita um identificador `CVE-`) e some-o
+   à lista `evaluators=[...]` de `run_experiment`. Rode com o Ollama ligado e veja o novo score
+   na tabela de `result.format()`.
+3. **Explique o resultado vazio.** A partir do código de `evaluate_average_accuracy`, explique
+   por que, sem LLM, o experimento imprime `No experiment results to display` e os
+   run-evaluators disparam erro de validação de score. Que guarda você adicionaria para que uma
+   execução sem respostas não gere o erro?
+4. **Troque o provedor.** Aponte `OLLAMA_BASE_URL` para o LM Studio (porta `1234`) ou para a
+   OpenAI e confirme que os **dois** scripts passam a chamar o novo endpoint sem mudar código —
+   só o `.env`. Veja [../LLM_SETUP.md](../LLM_SETUP.md).
+5. **Compare as duas abordagens.** Rode os dois scripts com tracing/credenciais configurados e
+   compare: no LangSmith o trace nasce automático da chain LCEL; no Langfuse ele nasce do wrapper
+   `langfuse.openai.OpenAI` + `run_experiment`. Qual exige menos código? Qual dá mais controle
+   sobre o que vira span?
 
----
+## Referências
 
-## 🎯 O que aprender daqui
+Fontes oficiais lidas ao escrever este README:
 
-1. **LangSmith**: Observabilidade automática para LangChain
-2. **LangFuse**: Open-source alternativa
-3. **Debugging**: Como encontrar problemas em agentes
-4. **Métricas**: Latência, tokens, qualidade
-5. **Feedback**: User feedback loops
-
-**Pro Tip para Entrevista**:
-> "Em produção, sempre use observabilidade. LangSmith para LangChain, LangFuse para qualquer coisa. Permite debugar rapidamente."
-
-**Next**: Vá para `04_appsec/` para dominar vulnerabilidades!
+- [Trace LangChain applications — LangSmith](https://docs.smith.langchain.com/observability/how_to_guides/trace_with_langchain)
+- [Experiments via SDK — Langfuse](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk)
+- [Setup do SDK Python — Langfuse](https://langfuse.com/docs/observability/sdk/python/setup)
+- [Documentação do LangSmith](https://docs.smith.langchain.com/)
+- [Documentação do Langfuse](https://langfuse.com/docs)
+- [Self-hosting do Langfuse](https://langfuse.com/self-hosting)
