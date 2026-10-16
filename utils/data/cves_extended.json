@@ -1,0 +1,470 @@
+[
+  {
+    "id": "CVE-2024-1234",
+    "severity": "CRITICAL",
+    "score": 9.8,
+    "description": "Remote code execution vulnerability in WebServer v2.1. An unauthenticated attacker can execute arbitrary commands on the server through a buffer overflow in the request handler. The vulnerability exists in the HTTP request parsing module which fails to properly validate input length before writing to a fixed-size buffer. This allows an attacker to overwrite the instruction pointer and redirect execution to malicious code. The vulnerability is exploitable over the network without authentication and affects all versions prior to 2.2. The attack vector is network-based with low complexity, allowing remote attackers to gain complete system compromise. Exploitation requires crafted HTTP requests with oversized headers that trigger the buffer overflow condition. Multiple proof-of-concept exploits are available in the wild.",
+    "affected_versions": [
+      "2.0",
+      "2.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "rce"
+  },
+  {
+    "id": "CVE-2024-5678",
+    "severity": "HIGH",
+    "score": 8.2,
+    "description": "SQL injection vulnerability in AuthService v1.5 authentication module. The vulnerability exists in the login form where user input is directly concatenated into SQL queries without proper parameterization. An attacker can bypass authentication by injecting SQL syntax into the username or password fields. This allows unauthorized access to user accounts and sensitive data stored in the database. The vulnerability can also be used to extract database credentials and perform privilege escalation attacks. The affected component handles user authentication and authorization, making this a critical security issue. Attackers can retrieve plaintext passwords, modify user permissions, or extract confidential information like API keys and tokens from the database. The attack requires only network access to the login endpoint and works with standard SQL injection payloads. Database tables containing user credentials are directly accessible through this vulnerability.",
+    "affected_versions": [
+      "1.4",
+      "1.5"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+    "vulnerability_type": "sql_injection"
+  },
+  {
+    "id": "CVE-2024-9012",
+    "severity": "MEDIUM",
+    "score": 6.5,
+    "description": "Cryptographic weakness in DataEncryption library v3.2. The implementation uses a weak random number generator for cryptographic key generation. The vulnerability allows attackers to predict encryption keys through statistical analysis of generated keystreams. This affects all cryptographic operations performed by applications using this library including AES encryption configuration, RSA key generation, and secure token creation. The weak random source is seeded from system time with insufficient entropy sources. An attacker with knowledge of approximate key generation time can brute force the weak keyspace. This vulnerability impacts the confidentiality of all encrypted data protected by keys generated with this library. Database encryption, file encryption, and API token generation are all affected. Recommendation is to upgrade to version 3.3 or later and regenerate all cryptographic keys.",
+    "affected_versions": [
+      "3.0",
+      "3.1",
+      "3.2"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "crypto"
+  },
+  {
+    "id": "CVE-2099-0001",
+    "severity": "CRITICAL",
+    "score": 9.9,
+    "description": "Remote code execution in EdgeProxy v4.0. An unauthenticated attacker sends a crafted upgrade request that overflows a fixed-size buffer in the connection handler, overwriting the return address and redirecting execution to attacker-controlled shellcode. The flaw is network reachable with low attack complexity and yields full host compromise.",
+    "affected_versions": [
+      "3.9",
+      "4.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "rce"
+  },
+  {
+    "id": "CVE-2099-0002",
+    "severity": "CRITICAL",
+    "score": 9.6,
+    "description": "Remote code execution in EdgeProxy v4.1 through a deserialization flaw in the plugin loader. A specially crafted session blob is deserialized without type validation, instantiating arbitrary gadget chains that run commands on the server. Distinct from the connection-handler overflow in the 4.0 branch but reachable by the same unauthenticated network path.",
+    "affected_versions": [
+      "4.0",
+      "4.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "rce"
+  },
+  {
+    "id": "CVE-2099-0003",
+    "severity": "HIGH",
+    "score": 8.1,
+    "description": "Authenticated remote code execution in TaskRunner v2.3. A low-privileged user can inject operating-system commands into a job template field that is passed unsanitized to a shell. Exploitation requires valid credentials, lowering impact relative to the unauthenticated proxy flaws but still allowing command execution in the worker context.",
+    "affected_versions": [
+      "2.2",
+      "2.3"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:L",
+    "vulnerability_type": "rce"
+  },
+  {
+    "id": "CVE-2099-0004",
+    "severity": "HIGH",
+    "score": 8.3,
+    "description": "SQL injection in ShopCart v6.0 product-search endpoint. The query string parameter is concatenated directly into a SQL statement with no parameterization, letting an attacker read arbitrary tables including customer records and order history. UNION-based payloads extract password hashes and stored payment tokens.",
+    "affected_versions": [
+      "5.9",
+      "6.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+    "vulnerability_type": "sql_injection"
+  },
+  {
+    "id": "CVE-2099-0005",
+    "severity": "HIGH",
+    "score": 7.5,
+    "description": "Blind SQL injection in ShopCart v6.1 coupon-validation endpoint. Unlike the error-based search-endpoint flaw, this variant leaks no error output; an attacker infers data one bit at a time using boolean and time-based payloads. The coupon code field is concatenated into the lookup query without binding parameters.",
+    "affected_versions": [
+      "6.0",
+      "6.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "sql_injection"
+  },
+  {
+    "id": "CVE-2099-0006",
+    "severity": "MEDIUM",
+    "score": 6.4,
+    "description": "Authenticated SQL injection in ReportBuilder v1.2 custom-filter feature. An analyst-role user supplies a filter expression that is interpolated into the reporting query. Impact is limited to data the reporting role can already see, but injection allows reading adjacent tenant rows in the shared warehouse.",
+    "affected_versions": [
+      "1.1",
+      "1.2"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "sql_injection"
+  },
+  {
+    "id": "CVE-2099-0007",
+    "severity": "MEDIUM",
+    "score": 6.1,
+    "description": "Stored cross-site scripting in CommentBox v2.0. User-submitted comment bodies are rendered without output encoding, so a script payload persists and executes in the browser of every visitor who views the thread, enabling session-cookie theft and UI redressing.",
+    "affected_versions": [
+      "1.9",
+      "2.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N",
+    "vulnerability_type": "xss"
+  },
+  {
+    "id": "CVE-2099-0008",
+    "severity": "MEDIUM",
+    "score": 5.4,
+    "description": "Reflected cross-site scripting in CommentBox v2.1 search page. A query parameter is echoed into the response without encoding; a crafted link executes script in the victim's browser when clicked. Distinct from the stored comment-body flaw: this one requires luring the victim to a malicious URL.",
+    "affected_versions": [
+      "2.0",
+      "2.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+    "vulnerability_type": "xss"
+  },
+  {
+    "id": "CVE-2099-0009",
+    "severity": "HIGH",
+    "score": 7.1,
+    "description": "Stored cross-site scripting in AdminPanel v3.4 user-notes field that executes in an administrator session. Because the payload runs with admin privileges it can create accounts and change settings, raising severity above typical reflected XSS.",
+    "affected_versions": [
+      "3.3",
+      "3.4"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:H/A:N",
+    "vulnerability_type": "xss"
+  },
+  {
+    "id": "CVE-2099-0010",
+    "severity": "MEDIUM",
+    "score": 6.5,
+    "description": "Cross-site request forgery in AccountHub v1.0 email-change endpoint. The form carries no anti-CSRF token, so a malicious page can submit an email change on behalf of an authenticated victim, enabling account takeover via a subsequent password reset.",
+    "affected_versions": [
+      "0.9",
+      "1.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:H/A:N",
+    "vulnerability_type": "csrf"
+  },
+  {
+    "id": "CVE-2099-0011",
+    "severity": "MEDIUM",
+    "score": 5.3,
+    "description": "Cross-site request forgery in AccountHub v1.1 notification-settings endpoint. Missing token validation lets an attacker toggle a victim's alert preferences. Lower impact than the email-change flaw because it cannot by itself lead to account takeover.",
+    "affected_versions": [
+      "1.0",
+      "1.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N",
+    "vulnerability_type": "csrf"
+  },
+  {
+    "id": "CVE-2099-0012",
+    "severity": "CRITICAL",
+    "score": 9.1,
+    "description": "Authentication bypass in GateKeeper v5.0 single-sign-on module. The service accepts a token whose signature is never verified, so an attacker forges an identity assertion and logs in as any user, including administrators, without valid credentials.",
+    "affected_versions": [
+      "4.9",
+      "5.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+    "vulnerability_type": "auth_bypass"
+  },
+  {
+    "id": "CVE-2099-0013",
+    "severity": "HIGH",
+    "score": 8.6,
+    "description": "Authentication bypass in GateKeeper v5.1 password-reset flow. A predictable reset token lets an attacker hijack the reset of a targeted account. Distinct from the SSO signature flaw: it requires knowing the victim's username and only yields that one account.",
+    "affected_versions": [
+      "5.0",
+      "5.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+    "vulnerability_type": "auth_bypass"
+  },
+  {
+    "id": "CVE-2099-0014",
+    "severity": "HIGH",
+    "score": 7.4,
+    "description": "Authentication bypass in AuthService v2.0 via logic flaw in the multi-factor step. When the second factor is submitted blank the server treats it as satisfied, letting an attacker who already has a password skip MFA entirely. Note the shared product family with the original SQL-injection AuthService record, but a different version and distinct vulnerability class.",
+    "affected_versions": [
+      "1.9",
+      "2.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "auth_bypass"
+  },
+  {
+    "id": "CVE-2099-0015",
+    "severity": "HIGH",
+    "score": 7.8,
+    "description": "Heap-based buffer overflow in ImageDecoder v1.4. A malformed image with an inconsistent chunk-length header causes an out-of-bounds write while decoding pixel data, corrupting heap metadata and potentially leading to a crash or memory corruption exploited by a crafted file.",
+    "affected_versions": [
+      "1.3",
+      "1.4"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "memory"
+  },
+  {
+    "id": "CVE-2099-0016",
+    "severity": "MEDIUM",
+    "score": 5.5,
+    "description": "Out-of-bounds read in ImageDecoder v1.5 metadata parser. A crafted image causes the parser to read past an allocation boundary and return adjacent heap bytes in an error field, disclosing small fragments of process memory. Distinct from the 1.4 heap overflow: this variant reads rather than writes and only leaks information.",
+    "affected_versions": [
+      "1.4",
+      "1.5"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "memory"
+  },
+  {
+    "id": "CVE-2099-0017",
+    "severity": "CRITICAL",
+    "score": 9.0,
+    "description": "Use-after-free in RtpStack v3.0 media session teardown. A race between a closing control channel and an in-flight data packet frees a session object that is then dereferenced, allowing an attacker on the network to corrupt memory and execute code in the media daemon.",
+    "affected_versions": [
+      "2.9",
+      "3.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "memory"
+  },
+  {
+    "id": "CVE-2099-0018",
+    "severity": "MEDIUM",
+    "score": 6.8,
+    "description": "Cryptographic weakness in VaultLib v2.0 key-derivation routine. The library derives keys with a fast unsalted hash over the passphrase, so precomputed rainbow tables recover the key offline. All data encrypted with keys from this routine is at risk of decryption.",
+    "affected_versions": [
+      "1.9",
+      "2.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "crypto"
+  },
+  {
+    "id": "CVE-2099-0019",
+    "severity": "MEDIUM",
+    "score": 5.9,
+    "description": "Cryptographic weakness in VaultLib v2.1 nonce handling for authenticated encryption. The counter nonce resets to zero on reconnect, so two messages reuse the same keystream and an attacker who captures both recovers their XOR. Distinct from the weak key-derivation flaw in 2.0: here the key is fine but the nonce is reused.",
+    "affected_versions": [
+      "2.0",
+      "2.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "crypto"
+  },
+  {
+    "id": "CVE-2099-0020",
+    "severity": "LOW",
+    "score": 3.7,
+    "description": "Cryptographic weakness in TokenMint v1.0 session identifiers that are generated from a non-cryptographic pseudo-random generator. Prediction is costly and requires many observed tokens, so real-world impact is limited, but identifiers should be treated as guessable.",
+    "affected_versions": [
+      "0.9",
+      "1.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+    "vulnerability_type": "crypto"
+  },
+  {
+    "id": "CVE-2099-0021",
+    "severity": "MEDIUM",
+    "score": 5.3,
+    "description": "Path traversal in FileShare v4.0 download endpoint. A crafted filename with parent-directory sequences escapes the storage root and reads arbitrary files the service account can access, such as configuration and log files.",
+    "affected_versions": [
+      "3.9",
+      "4.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0022",
+    "severity": "HIGH",
+    "score": 7.5,
+    "description": "Server-side request forgery in LinkFetcher v2.2 URL-preview feature. The service fetches an attacker-supplied URL without allow-listing, so an attacker reaches internal metadata endpoints and services not exposed to the internet.",
+    "affected_versions": [
+      "2.1",
+      "2.2"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0023",
+    "severity": "LOW",
+    "score": 3.1,
+    "description": "Information disclosure in StatusPage v1.0 debug banner that prints the exact build version and dependency versions on an error page, aiding an attacker in fingerprinting the stack. No direct compromise results from this disclosure alone.",
+    "affected_versions": [
+      "0.9",
+      "1.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0024",
+    "severity": "MEDIUM",
+    "score": 6.5,
+    "description": "Unrestricted file upload in UploadSvc v3.1 avatar endpoint. The server validates only the client-supplied content-type, so an attacker uploads an executable disguised as an image into a web-served directory, risking later execution.",
+    "affected_versions": [
+      "3.0",
+      "3.1"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0025",
+    "severity": "MEDIUM",
+    "score": 4.3,
+    "description": "A misconfiguration in the DataEncryption utility v4.0 command-line tool writes the plaintext of a file to a temporary path with world-readable permissions during encryption. The weakness is in file permissions, not in any random number generator or key algorithm, despite the cryptographic product name.",
+    "affected_versions": [
+      "3.9",
+      "4.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0026",
+    "severity": "LOW",
+    "score": 2.4,
+    "description": "Verbose error pages in WebServer v3.0 leak the full request-handler stack trace, mentioning buffer sizes and the HTTP request parsing module. This is an information leak only; there is no overflow and no code execution, despite overlapping terminology with memory-corruption reports.",
+    "affected_versions": [
+      "2.9",
+      "3.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0027",
+    "severity": "LOW",
+    "score": 3.3,
+    "description": "A rate-limiting gap in AuthService v3.0 login form allows rapid repeated attempts. There is no SQL injection and no authentication bypass; the login form simply fails to throttle, enabling slow credential-stuffing. Shares the login-form wording of the original SQL-injection record but is a different weakness.",
+    "affected_versions": [
+      "2.9",
+      "3.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0028",
+    "severity": "CRITICAL",
+    "score": 9.4,
+    "description": "Unauthenticated SQL injection in LegacyPortal v1.0 login endpoint allows full database read and write. Stacked queries let an attacker create administrator rows and dump every table, including the credential store.",
+    "affected_versions": [
+      "0.9",
+      "1.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "sql_injection"
+  },
+  {
+    "id": "CVE-2099-0029",
+    "severity": "HIGH",
+    "score": 8.8,
+    "description": "Remote code execution in BuildAgent v7.2 through an unauthenticated webhook that passes its payload into a template renderer evaluating expressions. An attacker triggers arbitrary command execution on the build host with a crafted webhook body.",
+    "affected_versions": [
+      "7.1",
+      "7.2"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "rce"
+  },
+  {
+    "id": "CVE-2099-0030",
+    "severity": "MEDIUM",
+    "score": 4.8,
+    "description": "DOM-based cross-site scripting in WikiLite v2.5 client-side renderer that interpolates a fragment identifier into the page without sanitization. A crafted link runs script in the victim browser entirely on the client side.",
+    "affected_versions": [
+      "2.4",
+      "2.5"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+    "vulnerability_type": "xss"
+  },
+  {
+    "id": "CVE-2099-0031",
+    "severity": "LOW",
+    "score": 3.5,
+    "description": "Cross-site request forgery in PollWidget v1.0 vote endpoint lets a malicious page cast a vote as an authenticated victim. Impact is low because voting is non-sensitive and rate-limited per account.",
+    "affected_versions": [
+      "0.9",
+      "1.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N",
+    "vulnerability_type": "csrf"
+  },
+  {
+    "id": "CVE-2099-0032",
+    "severity": "HIGH",
+    "score": 7.6,
+    "description": "Authentication bypass in DeviceLink v2.0 pairing protocol where a default static secret ships in firmware, letting any client on the local network pair without the owner's approval and issue device commands.",
+    "affected_versions": [
+      "1.9",
+      "2.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+    "vulnerability_type": "auth_bypass"
+  },
+  {
+    "id": "CVE-2099-0033",
+    "severity": "CRITICAL",
+    "score": 9.3,
+    "description": "Stack buffer overflow in ParserKit v5.0 when parsing a deeply nested document with an oversized token. The fixed stack buffer is overrun, overwriting the saved return address and permitting remote code execution via a crafted document.",
+    "affected_versions": [
+      "4.9",
+      "5.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "vulnerability_type": "memory"
+  },
+  {
+    "id": "CVE-2099-0034",
+    "severity": "MEDIUM",
+    "score": 6.2,
+    "description": "Cryptographic weakness in SignLib v1.2 which accepts signatures using a deprecated hash vulnerable to collisions, allowing an attacker to craft two documents with the same signature and substitute one for the other.",
+    "affected_versions": [
+      "1.1",
+      "1.2"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+    "vulnerability_type": "crypto"
+  },
+  {
+    "id": "CVE-2099-0035",
+    "severity": "MEDIUM",
+    "score": 5.0,
+    "description": "Improper access control in ConfigSync v2.0 admin API where a non-admin token can read configuration entries it should not, including feature flags and third-party endpoint names. No write access is granted by this flaw.",
+    "affected_versions": [
+      "1.9",
+      "2.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+    "vulnerability_type": "other"
+  },
+  {
+    "id": "CVE-2099-0036",
+    "severity": "INFO",
+    "score": 0.0,
+    "description": "Informational finding in DocsSite v1.0: the site exposes a sitemap listing internal draft page URLs. The pages themselves enforce access control, so no confidential content is disclosed; this is recorded for completeness and carries no security impact.",
+    "affected_versions": [
+      "1.0"
+    ],
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+    "vulnerability_type": "other"
+  }
+]
