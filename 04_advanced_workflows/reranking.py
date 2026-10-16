@@ -43,13 +43,12 @@ Optional (real cross-encoder, downloads a small model on first run):
     pip install sentence-transformers
 """
 
-from typing import Dict, List, Set, Tuple
 
-from utils.search import create_search_engine
 from utils.data_loader import get_cve_documents
-from utils.models import SearchResult
-from utils.text import content_terms
 from utils.logging import get_logger
+from utils.models import SearchResult
+from utils.search import create_search_engine
+from utils.text import content_terms
 
 logger = get_logger(__name__)
 
@@ -72,7 +71,7 @@ TOP_K = 10
 # This is the realistic production shape: the first stage hands over a candidate
 # set that mixes true hits with keyword-matched near-misses. These are clearly
 # marked (ids prefixed "DISTRACTOR-") and never confused with real CVEs.
-DISTRACTORS: List[Dict] = [
+DISTRACTORS: list[dict] = [
     {
         "id": "DISTRACTOR-keyword-stuffed",
         "content": (
@@ -100,13 +99,13 @@ DISTRACTORS: List[Dict] = [
 # ---------------------------------------------------------------------------
 # Terms with no topical signal — excluded so a document is not judged relevant
 # just because stopwords co-occur with the query.
-_STOPWORDS: Set[str] = {
+_STOPWORDS: set[str] = {
     "a", "an", "and", "the", "in", "on", "of", "to", "for", "with", "by",
     "is", "are", "be", "at", "or", "from", "into", "that", "this", "it",
 }
 
 
-def _content_terms(text: str) -> Set[str]:
+def _content_terms(text: str) -> set[str]:
     """Content-bearing terms: tokens minus this module's stopwords and pure numbers."""
     return content_terms(text, _STOPWORDS)
 
@@ -152,9 +151,9 @@ def load_cross_encoder():
 
 def rerank(
     query: str,
-    candidates: List[SearchResult],
+    candidates: list[SearchResult],
     cross_encoder,
-) -> Tuple[List[Tuple[SearchResult, float]], bool]:
+) -> tuple[list[tuple[SearchResult, float]], bool]:
     """
     Rerank first-stage candidates by relevance to the query.
 
@@ -191,8 +190,8 @@ def _short(result: SearchResult) -> str:
 
 
 def print_side_by_side(
-    before: List[SearchResult],
-    after: List[Tuple[SearchResult, float]],
+    before: list[SearchResult],
+    after: list[tuple[SearchResult, float]],
     used_cross_encoder: bool,
 ) -> None:
     """Print the hybrid ordering next to the reranked ordering."""

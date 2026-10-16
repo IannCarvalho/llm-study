@@ -17,10 +17,9 @@ The retriever under test is the project's hybrid engine
 inputs always yield the same ranking, so the reported numbers are reproducible.
 """
 
-from typing import Dict, List, Set
 
-from utils.search import as_search_documents, create_search_engine
 from utils.data_loader import get_cve_documents
+from utils.search import as_search_documents, create_search_engine
 from utils.text import content_terms
 
 # ---------------------------------------------------------------------------
@@ -46,18 +45,18 @@ EVAL_CASES = [
 
 # Terms that carry no topical signal — excluded from the groundedness proxy so a
 # query is not judged "grounded" just because stopwords appear in every document.
-_STOPWORDS: Set[str] = {
+_STOPWORDS: set[str] = {
     "a", "an", "and", "the", "in", "on", "of", "to", "for", "with", "by",
     "is", "are", "be", "at", "or", "from", "into",
 }
 
 
-def _content_terms(text: str) -> Set[str]:
+def _content_terms(text: str) -> set[str]:
     """Content-bearing terms: tokens minus this module's stopwords and pure numbers."""
     return content_terms(text, _STOPWORDS)
 
 
-def precision_at_k(retrieved_ids: List[str], relevant_ids: Set[str], k: int) -> float:
+def precision_at_k(retrieved_ids: list[str], relevant_ids: set[str], k: int) -> float:
     """
     Fraction of the top-k retrieved documents that are relevant.
 
@@ -78,7 +77,7 @@ def precision_at_k(retrieved_ids: List[str], relevant_ids: Set[str], k: int) -> 
     return hits / k
 
 
-def groundedness_proxy(query: str, retrieved_docs: List[str]) -> float:
+def groundedness_proxy(query: str, retrieved_docs: list[str]) -> float:
     """
     LLM-free groundedness signal: term overlap between the query and the pooled
     retrieved context.
@@ -92,7 +91,7 @@ def groundedness_proxy(query: str, retrieved_docs: List[str]) -> float:
     if not query_terms:
         return 0.0
 
-    context_terms: Set[str] = set()
+    context_terms: set[str] = set()
     for doc in retrieved_docs:
         context_terms |= _content_terms(doc)
 
@@ -100,7 +99,7 @@ def groundedness_proxy(query: str, retrieved_docs: List[str]) -> float:
     return len(covered) / len(query_terms)
 
 
-def build_documents() -> List[Dict]:
+def build_documents() -> list[dict]:
     """Adapt get_cve_documents() {id: text} into the retriever's doc shape."""
     return as_search_documents(get_cve_documents())
 
@@ -122,8 +121,8 @@ def main() -> None:
     print(f"Corpus: {len(documents)} CVE documents | metric cutoff: k={k}")
     print("=" * 70)
 
-    precisions: List[float] = []
-    groundedness_scores: List[float] = []
+    precisions: list[float] = []
+    groundedness_scores: list[float] = []
 
     for case in EVAL_CASES:
         query = case["query"]

@@ -1,19 +1,20 @@
 """Unified Search - BM25, Semantic, and Hybrid Search"""
 
-from typing import List, Dict, Union
+
 import numpy as np
 from rank_bm25 import BM25Okapi
-from utils.semantic_embeddings import embed_text, embed_texts
-from utils.models import SearchResult
-from utils.constants import RRF_K, MIN_SEMANTIC_SIMILARITY
-from utils.logging import get_logger
-from utils.text import tokenize
 from sentence_transformers import util
+
+from utils.constants import MIN_SEMANTIC_SIMILARITY, RRF_K
+from utils.logging import get_logger
+from utils.models import SearchResult
+from utils.semantic_embeddings import embed_text, embed_texts
+from utils.text import tokenize
 
 logger = get_logger(__name__)
 
 
-def as_search_documents(documents: Dict[str, str]) -> List[Dict]:
+def as_search_documents(documents: dict[str, str]) -> list[dict]:
     """
     Adapt ``{id: text}`` (what get_cve_documents returns) into the engines' shape.
 
@@ -30,7 +31,7 @@ def as_search_documents(documents: Dict[str, str]) -> List[Dict]:
 class BM25Search:
     """Keyword-based search using BM25 algorithm."""
 
-    def search(self, query: str, documents: List[Dict], top_k: int = 3) -> List[SearchResult]:
+    def search(self, query: str, documents: list[dict], top_k: int = 3) -> list[SearchResult]:
         """Perform BM25 keyword search."""
         if not documents:
             return []
@@ -71,7 +72,7 @@ class BM25Search:
 class SemanticSearch:
     """Meaning-based search using embeddings."""
 
-    def search(self, query: str, documents: List[Dict], top_k: int = 3) -> List[SearchResult]:
+    def search(self, query: str, documents: list[dict], top_k: int = 3) -> list[SearchResult]:
         """Perform semantic search using embeddings."""
         if not documents:
             return []
@@ -114,7 +115,7 @@ class HybridSearch:
         self.bm25 = BM25Search()
         self.semantic = SemanticSearch()
 
-    def search(self, query: str, documents: List[Dict], top_k: int = 3) -> List[SearchResult]:
+    def search(self, query: str, documents: list[dict], top_k: int = 3) -> list[SearchResult]:
         """Perform hybrid search combining BM25 and semantic."""
         if not documents:
             return []
@@ -133,9 +134,9 @@ class HybridSearch:
 
     def _reciprocal_rank_fusion(
         self,
-        bm25_results: List[SearchResult],
-        semantic_results: List[SearchResult]
-    ) -> List[SearchResult]:
+        bm25_results: list[SearchResult],
+        semantic_results: list[SearchResult]
+    ) -> list[SearchResult]:
         """Combine BM25 and semantic results using Reciprocal Rank Fusion."""
         # Build rank dictionaries: {doc_id: rank}
         bm25_ranks = {r.id: i + 1 for i, r in enumerate(bm25_results)}
@@ -174,7 +175,7 @@ class HybridSearch:
         return combined
 
 
-def create_search_engine(method: str = "hybrid", **kwargs) -> Union[BM25Search, SemanticSearch, HybridSearch]:
+def create_search_engine(method: str = "hybrid", **kwargs) -> BM25Search | SemanticSearch | HybridSearch:
     """Create search engine instance."""
     methods = {
         "bm25": BM25Search,

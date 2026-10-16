@@ -10,8 +10,8 @@ Three strategies with different trade-offs:
 - Recursive: RECOMMENDED, respects hierarchical structure (paragraphs → sentences → words)
 """
 
-from utils.chunking_utils import test_chunking_strategies
 from utils.agentic_utils import SAMPLE_DOCUMENTS
+from utils.chunking_utils import test_chunking_strategies
 
 
 def main() -> None:

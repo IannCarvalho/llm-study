@@ -8,11 +8,9 @@ two text-cleaning helpers directly.
 """
 
 from enum import Enum
-from typing import Optional
-
-from pydantic import BaseModel, Field
 
 from conftest import load_module
+from pydantic import BaseModel, Field
 
 rp = load_module("10_structured_output/retry_parser.py", "retry_parser")
 
@@ -72,7 +70,7 @@ def test_extract_json_block_no_json_returns_cleaned_input():
 # parse_with_retry
 # ---------------------------------------------------------------------------
 def test_parse_with_retry_valid_first_attempt():
-    def gen(_feedback: Optional[str]) -> str:
+    def gen(_feedback: str | None) -> str:
         return '{"name": "alpha", "count": 3, "color": "green"}'
 
     result = rp.parse_with_retry(Widget, gen, max_attempts=3)
@@ -84,7 +82,7 @@ def test_parse_with_retry_valid_first_attempt():
 
 
 def test_parse_with_retry_strips_fence_and_prose():
-    def gen(_feedback: Optional[str]) -> str:
+    def gen(_feedback: str | None) -> str:
         return (
             "Sure, here is the result:\n"
             "```json\n"
@@ -106,7 +104,7 @@ def test_parse_with_retry_self_corrects_across_attempts():
     """
     state = {"calls": 0}
 
-    def gen(feedback: Optional[str]) -> str:
+    def gen(feedback: str | None) -> str:
         state["calls"] += 1
         if feedback is None:
             return "I think the count is five, color blue."  # not JSON
@@ -123,7 +121,7 @@ def test_parse_with_retry_self_corrects_across_attempts():
 
 
 def test_parse_with_retry_gives_up_cleanly():
-    def gen(_feedback: Optional[str]) -> str:
+    def gen(_feedback: str | None) -> str:
         return '{"name": "delta", "count": -9, "color": "mauve"}'  # always invalid
 
     result = rp.parse_with_retry(Widget, gen, max_attempts=2)

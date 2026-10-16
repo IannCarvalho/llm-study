@@ -10,10 +10,11 @@ actions can chain across multiple steps.
 """
 
 import re
-from utils.llm_client import get_llm_client
-from utils.tools import TOOL_REGISTRY
-from utils.prompts import REACT_SYSTEM
+
 from utils.agentic_utils import QUERY
+from utils.llm_client import get_llm_client
+from utils.prompts import REACT_SYSTEM
+from utils.tools import TOOL_REGISTRY
 
 MAX_STEPS = 5
 ACTION_RE = re.compile(r"Action:\s*(\w+)\[(.*?)\]")

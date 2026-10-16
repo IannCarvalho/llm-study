@@ -25,8 +25,9 @@ Run the self-test (no Ollama needed):
 
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional, Tuple, Type, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
@@ -35,7 +36,7 @@ M = TypeVar("M", bound=BaseModel)
 
 # A generator takes optional feedback (why the last attempt failed) and returns
 # the next raw candidate string.
-Generator = Callable[[Optional[str]], str]
+Generator = Callable[[str | None], str]
 
 
 # Match an outer ```...``` fence, optionally tagged with a language like ```json.
@@ -84,16 +85,16 @@ def extract_json_block(text: str) -> str:
 class ParseResult:
     """Outcome of a parse_with_retry run."""
 
-    model: Optional[BaseModel]
+    model: BaseModel | None
     attempts: int
     success: bool
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     last_raw: str = ""
 
 
 def _validate_once(
-    model_cls: Type[M], raw: str
-) -> Tuple[Optional[M], Optional[str]]:
+    model_cls: type[M], raw: str
+) -> tuple[M | None, str | None]:
     """
     Try to turn one raw string into a validated model instance.
 
@@ -121,7 +122,7 @@ def _validate_once(
 
 
 def parse_with_retry(
-    model_cls: Type[M],
+    model_cls: type[M],
     generator: Generator,
     max_attempts: int = 3,
 ) -> ParseResult:
@@ -141,8 +142,8 @@ def parse_with_retry(
     if max_attempts < 1:
         raise ValueError("max_attempts must be >= 1")
 
-    errors: List[str] = []
-    feedback: Optional[str] = None
+    errors: list[str] = []
+    feedback: str | None = None
     last_raw = ""
 
     for attempt in range(1, max_attempts + 1):
@@ -200,7 +201,7 @@ def main() -> None:
     print("=" * 70)
 
     # --- Case 1: valid bare JSON on the first try ------------------------
-    def gen_valid(_feedback: Optional[str]) -> str:
+    def gen_valid(_feedback: str | None) -> str:
         return '{"name": "alpha", "count": 3, "color": "green"}'
 
     r1 = parse_with_retry(Widget, gen_valid, max_attempts=3)
@@ -209,7 +210,7 @@ def main() -> None:
     assert r1.success and r1.attempts == 1, "case 1 should pass on attempt 1"
 
     # --- Case 2: JSON wrapped in a ```json fence -------------------------
-    def gen_fenced(_feedback: Optional[str]) -> str:
+    def gen_fenced(_feedback: str | None) -> str:
         return (
             "Sure, here is the result:\n"
             "```json\n"
@@ -229,7 +230,7 @@ def main() -> None:
     def make_self_correcting() -> Generator:
         state = {"calls": 0}
 
-        def gen(feedback: Optional[str]) -> str:
+        def gen(feedback: str | None) -> str:
             state["calls"] += 1
             if feedback is None:
                 # Attempt 1: not even JSON.
@@ -250,7 +251,7 @@ def main() -> None:
     assert r3.success and r3.attempts == 3, "case 3 should succeed on attempt 3"
 
     # --- Case 4: never valid -> give up after max_attempts ---------------
-    def gen_always_bad(_feedback: Optional[str]) -> str:
+    def gen_always_bad(_feedback: str | None) -> str:
         return '{"name": "delta", "count": -9, "color": "mauve"}'
 
     r4 = parse_with_retry(Widget, gen_always_bad, max_attempts=2)

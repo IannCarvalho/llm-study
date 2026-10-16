@@ -33,11 +33,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List
 
-from utils.search import as_search_documents, create_search_engine
 from utils.data_loader import get_cve_documents, load_cves
 from utils.logging import get_logger
+from utils.search import as_search_documents, create_search_engine
 
 # NOTE: utils.llm_client is imported lazily inside generate_answer(), NOT here.
 # It pulls in langchain_openai, which is an LLM-stack dependency. Importing it at
@@ -59,7 +58,7 @@ TOP_K = 3
 # Document shape (GOTCHA): get_cve_documents() returns {cve_id: text}; the search
 # engine wants List[{"id", "content", "metadata"}] with the "content" key.
 # ---------------------------------------------------------------------------
-def build_documents() -> List[Dict]:
+def build_documents() -> list[dict]:
     """Adapt get_cve_documents() {id: text} into the retriever's doc shape."""
     return as_search_documents(get_cve_documents())
 
@@ -81,18 +80,18 @@ class AgentState:
     """Everything the loop accumulates across iterations."""
 
     query: str
-    sub_queries_run: List[str] = field(default_factory=list)
+    sub_queries_run: list[str] = field(default_factory=list)
     # cve_id -> RetrievedDoc, so re-finding a CVE in a later search keeps the
     # best score instead of duplicating it.
-    evidence: Dict[str, RetrievedDoc] = field(default_factory=dict)
-    trace: List[str] = field(default_factory=list)
+    evidence: dict[str, RetrievedDoc] = field(default_factory=dict)
+    trace: list[str] = field(default_factory=list)
 
     def add_result(self, doc_id: str, content: str, score: float) -> None:
         existing = self.evidence.get(doc_id)
         if existing is None or score > existing.score:
             self.evidence[doc_id] = RetrievedDoc(doc_id, content, score)
 
-    def ranked_evidence(self) -> List[RetrievedDoc]:
+    def ranked_evidence(self) -> list[RetrievedDoc]:
         return sorted(self.evidence.values(), key=lambda d: d.score, reverse=True)
 
 
@@ -101,7 +100,7 @@ class AgentState:
 # ---------------------------------------------------------------------------
 # Topic cues map a word in the user's question to a focused retrieval sub-query.
 # These are lexical rules, so decomposition is reproducible and offline.
-_TOPIC_CUES: List[tuple[tuple[str, ...], str]] = [
+_TOPIC_CUES: list[tuple[tuple[str, ...], str]] = [
     (("rce", "remote code execution", "code execution", "execute"),
      "remote code execution buffer overflow command injection"),
     (("request handler", "request parsing", "http request", "handler"),
@@ -156,7 +155,7 @@ def wants_comparison(query: str) -> bool:
     return any(cue in norm for cue in _COMPARISON_CUES)
 
 
-def plan_sub_queries(query: str) -> List[str]:
+def plan_sub_queries(query: str) -> list[str]:
     """
     Decompose a (possibly compound) question into focused retrieval sub-queries,
     by rule. Each distinct topic cue present in the question yields one sub-query;
@@ -164,7 +163,7 @@ def plan_sub_queries(query: str) -> List[str]:
     matches, so the planner never returns an empty plan for a retrieval question.
     """
     norm = _normalize(query)
-    subs: List[str] = []
+    subs: list[str] = []
     for cues, sub_query in _TOPIC_CUES:
         if any(cue in norm for cue in cues) and sub_query not in subs:
             subs.append(sub_query)
@@ -177,7 +176,7 @@ def plan_sub_queries(query: str) -> List[str]:
 # ---------------------------------------------------------------------------
 # The agentic loop
 # ---------------------------------------------------------------------------
-def run_agentic_retrieval(query: str, documents: List[Dict]) -> AgentState:
+def run_agentic_retrieval(query: str, documents: list[dict]) -> AgentState:
     """
     Iterative, decision-driven retrieval. Deterministic and LLM-free.
 
@@ -225,7 +224,7 @@ def run_agentic_retrieval(query: str, documents: List[Dict]) -> AgentState:
 # ---------------------------------------------------------------------------
 # Deterministic synthesis helpers (used both as fallback and to ground the LLM)
 # ---------------------------------------------------------------------------
-def _severity_by_id() -> Dict[str, float]:
+def _severity_by_id() -> dict[str, float]:
     """Map CVE id -> CVSS score, straight from the dataset (no LLM)."""
     return {cve.id: cve.score for cve in load_cves()}
 
@@ -318,7 +317,7 @@ DEMO_QUERIES = [
 ]
 
 
-def run_query(query: str, documents: List[Dict]) -> None:
+def run_query(query: str, documents: list[dict]) -> None:
     """Run the full agentic pipeline for one query and print the trace."""
     print("=" * 74)
     print(f"QUERY: {query}")

@@ -27,7 +27,6 @@ Run:
 """
 
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -107,7 +106,7 @@ def make_llm_generator(client, base_prompt: str) -> Generator:
     is 0.0 to make the extraction as deterministic as the backend allows.
     """
 
-    def generate(feedback: Optional[str]) -> str:
+    def generate(feedback: str | None) -> str:
         prompt = base_prompt
         if feedback:
             prompt = f"{base_prompt}\n\n{feedback}"

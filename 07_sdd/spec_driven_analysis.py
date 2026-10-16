@@ -19,14 +19,12 @@ Run from the repo root (PYTHONPATH="."):
 """
 
 import json
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from utils.llm_client import get_llm_client
 from utils.data_loader import get_cve_by_id
+from utils.llm_client import get_llm_client
 from utils.models import CVEData
-
 
 # ---------------------------------------------------------------------------
 # THE SPEC (structured artifact)
@@ -107,8 +105,8 @@ class ValidationReport(BaseModel):
     missing_fields: list[str] = Field(default_factory=list)
     empty_fields: list[str] = Field(default_factory=list)
     severity_ok: bool = False
-    parsed: Optional[dict] = None
-    error: Optional[str] = None
+    parsed: dict | None = None
+    error: str | None = None
 
 
 def _strip_fences(text: str) -> str:
