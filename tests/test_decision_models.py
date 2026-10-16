@@ -13,6 +13,7 @@ already-registered ``decision_model`` object instead of re-loading it.
 """
 
 import json
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -37,7 +38,8 @@ def make_fake_embedder(dim: int = 32):
         out = np.zeros((len(texts), dim), dtype=np.float64)
         for r, text in enumerate(texts):
             for tok in str(text).lower().split():
-                out[r, hash(tok) % dim] += 1.0
+                # crc32, not hash(): str hashing is salted per process.
+                out[r, zlib.crc32(tok.encode("utf-8")) % dim] += 1.0
         return out
 
     return embed
@@ -270,3 +272,39 @@ def test_labeled_cases_valid_against_enums(repo_root: Path):
         assert c["type"] in valid_types, f"{c['id']} bad type {c['type']}"
         assert c["severity"] in valid_sev, f"{c['id']} bad severity {c['severity']}"
         assert isinstance(c["remote_exploit"], bool)
+
+
+
+# ---------------------------------------------------------------------------
+# jev_client: request payload only (never calls the network)
+# ---------------------------------------------------------------------------
+def test_jev_payload_matches_the_documented_request_shape():
+    import importlib
+
+    jev = load_module("16_decision_models/jev_client.py", "jev_client")
+    # A second copy of decision_model, loaded the way `python -m` users get it:
+    dm_pkg = importlib.import_module("16_decision_models.decision_model")
+    questions = {
+        "severity": dm.Choice(instructions="How severe", options={"LOW": "minor", "HIGH": "major"}),
+        "risk": dm_pkg.Score(instructions="How risky", levels=["low", "medium", "high"]),
+        "remote": dm_pkg.Noul(instructions="Is it remotely exploitable?"),
+        "raw": {"type": "noul", "instructions": "Passed through untouched"},
+    }
+
+    payload = jev._question_payload(questions)
+
+    assert payload["severity"] == {
+        "type": "choice", "instructions": "How severe", "criteria": {"LOW": "minor", "HIGH": "major"},
+    }
+    assert payload["risk"] == {
+        "type": "score", "instructions": "How risky", "criteria": ["low", "medium", "high"],
+    }
+    assert payload["remote"] == {"type": "noul", "instructions": "Is it remotely exploitable?"}
+    assert payload["raw"] is questions["raw"]
+
+
+def test_jev_client_refuses_to_run_without_a_key(monkeypatch):
+    jev = load_module("16_decision_models/jev_client.py", "jev_client")
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    with pytest.raises(jev.JevClientError):
+        jev.system_one("state", {"q": {"type": "noul", "instructions": "x"}})

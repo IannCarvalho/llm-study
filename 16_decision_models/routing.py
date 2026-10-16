@@ -179,15 +179,19 @@ def main() -> None:
     (the same trick the tests use): the real embedder is only exercised by
     decision_model.main(). This keeps the routing logic the thing on display.
     """
+    import zlib
+
     import numpy as np
 
     # A tiny deterministic "embedder": hashes each text into a fixed vector.
+    # zlib.crc32, not hash(): Python's str hash is salted per process
+    # (PYTHONHASHSEED), which would change the numbers on every run.
     def fake_embedder(texts: Sequence[str]) -> np.ndarray:
         dim = 24
         out = np.zeros((len(texts), dim), dtype=np.float64)
         for r, text in enumerate(texts):
             for tok in text.lower().split():
-                out[r, hash(tok) % dim] += 1.0
+                out[r, zlib.crc32(tok.encode("utf-8")) % dim] += 1.0
         return out
 
     model = DecisionModel(embedder=fake_embedder, temperature=1.0)

@@ -43,28 +43,30 @@ def _question_payload(questions: Mapping[str, object]) -> dict[str, dict]:
     """Translate local typed-question objects into the API's JSON question map.
 
     Accepts the Choice / Score / Noul dataclasses from decision_model, or ready
-    dicts (passed through untouched). Imported lazily to avoid a hard dependency
-    on the sibling module at import time.
+    dicts (passed through untouched). The dataclasses are matched by class NAME
+    on purpose: this package is digit-prefixed, so decision_model may have been
+    loaded under different module names (``16_decision_models.decision_model``
+    via importlib, ``decision_model`` via the tests' load_module), and an
+    ``isinstance`` check against one copy rejects objects from the other.
     """
-    from decision_model import Choice, Noul, Score  # local, lazy
-
     payload: dict[str, dict] = {}
     for qid, q in questions.items():
+        kind = type(q).__name__
         if isinstance(q, dict):
             payload[qid] = q
-        elif isinstance(q, Choice):
+        elif kind == "Choice":
             payload[qid] = {
                 "type": "choice",
                 "instructions": q.instructions,
                 "criteria": q.options,
             }
-        elif isinstance(q, Score):
+        elif kind == "Score":
             payload[qid] = {
                 "type": "score",
                 "instructions": q.instructions,
                 "criteria": q.levels,
             }
-        elif isinstance(q, Noul):
+        elif kind == "Noul":
             entry: dict[str, object] = {"type": "noul", "instructions": q.instructions}
             if q.yes is not None or q.no is not None:
                 entry["criteria"] = {"true": q.yes or "", "false": q.no or ""}
@@ -127,17 +129,15 @@ def main() -> None:
     if not os.environ.get(API_KEY_ENV):
         print(
             f"[skipped] {API_KEY_ENV} is not set, so the real Jev client cannot "
-            "run. Set it to a key from https://console.typesafe.ai/keys to try "
-            "this file; the offline baseline (decision_model.py) needs no key."
+            "run. Set it to a key from the TypeSafe console (https://console.typesafe.ai) "
+            "to try this file; the offline baseline (decision_model.py) needs no key."
         )
         return
-
-    from decision_model import Noul  # local, lazy
 
     try:
         response = system_one(
             state="Our payment API has been returning 500 errors for an hour.",
-            questions={"is_urgent": Noul(instructions="Does this convey urgency?")},
+            questions={"is_urgent": {"type": "noul", "instructions": "Does this convey urgency?"}},
         )
     except JevClientError as exc:
         print(f"[error] {exc}")
