@@ -1,0 +1,38 @@
+commit 8541f10f6ebeab3095492ca6d2d32be20ff9329e
+Author: Iann Carvalho Barbosa <iann.barbosa@example.com>
+Date:   Thu Oct 15 02:49:17 2026 -0300
+
+    feat: modulo 14_semantic_caching (cache por similaridade de query) (#17)
+
+    Cache de respostas por SIMILARIDADE de cosseno (nao exact-match) pra cortar
+    custo/latencia: SemanticCache(threshold) com get/set, embeddings via
+    sentence-transformers, metricas hits/misses/hit_rate.
+
+commit 46c2ce42b7ee422eab5efffdaaddbcbe338d1c4d
+Author: Iann Carvalho Barbosa <iann.barbosa@example.com>
+Date:   Thu Oct 15 02:48:54 2026 -0300
+
+    feat: adiciona modulo 13_deployment (API FastAPI com streaming SSE) (#16)
+
+    Expoe o pipeline de busca/RAG sobre CVEs como API HTTP: POST /query,
+    GET/POST /stream (SSE), GET /health. Import lazy do llm_client + fallback
+    deterministico de busca hibrida (roda sem Ollama).
+
+commit c190ddff66e92bfa10c0903eb6d25b50da468929
+Author: Iann Carvalho Barbosa <iann.barbosa@example.com>
+Date:   Thu Oct 15 01:35:55 2026 -0300
+
+    docs: adiciona LICENSE (MIT), CONTRIBUTING e badges; atualiza intro (#15)
+
+    LICENSE MIT, CONTRIBUTING com setup (venv py311), e badges (CI, Python,
+    License, ruff) apos o titulo do README.
+
+commit 485ef4254e470894989e4785db7701de788bd381
+Author: Iann Carvalho Barbosa <iann.barbosa@example.com>
+Date:   Thu Oct 15 01:35:30 2026 -0300
+
+    chore: CI, suite de testes pytest e lint (ruff) (#14)
+
+    Primeiro gate de qualidade do repo. 83 testes cobrindo os caminhos
+    deterministicos de 7 modulos; CI em ubuntu-latest Python 3.11 roda ruff
+    check e pytest em push e pull_request.
