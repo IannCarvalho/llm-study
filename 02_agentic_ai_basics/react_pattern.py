@@ -50,5 +50,9 @@ def run_react_agent(user_query: str) -> None:
     print("Reached max iterations without a final answer.")
 
 
-if __name__ == "__main__":
+def main() -> None:
     run_react_agent(QUERY)
+
+
+if __name__ == "__main__":
+    main()

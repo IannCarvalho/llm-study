@@ -24,7 +24,7 @@ Run the self-test (no LLM required):
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, List, Optional
 
 
@@ -204,7 +204,7 @@ class ConversationMemory:
         return len(self._turns)
 
 
-def _demo() -> None:
+def main() -> None:
     """
     Self-test with a deterministic (no-LLM) summarizer.
 
@@ -269,4 +269,4 @@ def _demo() -> None:
 
 
 if __name__ == "__main__":
-    _demo()
+    main()
