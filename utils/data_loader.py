@@ -145,8 +145,57 @@ def reset_cache():
     logger.info("Data loading cache cleared")
 
 
+def load_cves_from(path: str | Path) -> List[CVEData]:
+    """
+    Load CVE data from an arbitrary JSON file (opt-in alternative dataset).
+
+    Mirrors :func:`load_cves` exactly, including the ``CVEData`` construction,
+    but reads from the caller-supplied ``path`` instead of the fixed
+    ``cves.json`` and is not cached (so switching datasets needs no cache
+    reset). Intended for the extended synthetic dataset
+    (``utils/data/cves_extended.json``) used by retrieval evaluations; it does
+    not change the default dataset or any behaviour that relies on it.
+
+    Args:
+        path: Path to a JSON file in the same schema as ``cves.json``.
+
+    Returns:
+        List of CVEData instances (empty list if the file is missing or
+        cannot be parsed, matching ``load_cves``).
+    """
+    cve_file = Path(path)
+
+    if not cve_file.exists():
+        logger.warning(f"CVE data file not found: {cve_file}")
+        return []
+
+    try:
+        with open(cve_file, 'r') as f:
+            data = json.load(f)
+
+        cves = [
+            CVEData(
+                id=item["id"],
+                severity=SeverityLevel(item["severity"]),
+                score=item["score"],
+                description=item["description"],
+                affected_versions=item.get("affected_versions", []),
+                cvss_vector=item["cvss_vector"],
+                metadata={"vulnerability_type": item.get("vulnerability_type", "other")}
+            )
+            for item in data
+        ]
+
+        return cves
+
+    except Exception as e:
+        logger.error(f"Failed to load CVEs from {cve_file}: {e}")
+        return []
+
+
 __all__ = [
     "load_cves",
+    "load_cves_from",
     "get_cve_by_id",
     "search_cves",
     "get_cve_documents",
